@@ -1,0 +1,106 @@
+<div class="apertura-caja-page">
+  <div class="page-header">
+    <h2>Apertura de caja</h2>
+    <button class="primary" (click)="openCreateModal()">Nueva apertura</button>
+  </div>
+
+  @if (errorMessage) {
+    <p class="error">{{ errorMessage }}</p>
+  }
+
+  @if (successMessage) {
+    <p class="success">{{ successMessage }}</p>
+  }
+
+  <div class="table-card">
+    <h3>Listado de aperturas</h3>
+
+    @if (loading) {
+      <p>Cargando aperturas...</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Caja</th>
+            <th>Empleado</th>
+            <th>Fecha apertura</th>
+            <th>Monto inicial</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (apertura of aperturas; track apertura.id_apertura_caja) {
+            <tr>
+              <td>{{ apertura.id_apertura_caja }}</td>
+              <td>{{ getCajaText(apertura) }}</td>
+              <td>{{ getEmpleadoText(apertura) }}</td>
+              <td>{{ apertura.fecha_apertura | date:'short' }}</td>
+              <td>{{ apertura.monto_inicial }}</td>
+              <td>
+                <span [class.active]="apertura.estado === 'ABIERTA'" [class.inactive]="apertura.estado !== 'ABIERTA'">
+                  {{ apertura.estado }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  @if (showModal) {
+    <div class="modal-backdrop">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>Registrar apertura de caja</h3>
+          <button class="close-btn" (click)="closeModal()">X</button>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="grid">
+            <div>
+              <label>Caja</label>
+              <select formControlName="id_caja">
+                <option value="">Seleccione</option>
+                @for (caja of cajas; track caja.id_caja) {
+                  <option [value]="caja.id_caja">
+                    {{ caja.nombre }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div>
+              <label>Monto inicial</label>
+              <input type="number" formControlName="monto_inicial" min="0" step="0.01" />
+            </div>
+
+            <div class="full-width">
+              <label>Empleado</label>
+              <input
+                type="text"
+                [value]="currentUser?.empleado?.nombre + ' ' + currentUser?.empleado?.apellidos"
+                readonly
+              />
+            </div>
+          </div>
+
+          @if (modalErrorMessage) {
+            <p class="error">{{ modalErrorMessage }}</p>
+          }
+
+          <div class="modal-actions">
+            <button type="submit" class="primary" [disabled]="saving">
+              {{ saving ? 'Guardando...' : 'Registrar apertura' }}
+            </button>
+
+            <button type="button" class="secondary" (click)="closeModal()">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

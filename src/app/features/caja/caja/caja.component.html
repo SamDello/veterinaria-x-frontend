@@ -1,0 +1,109 @@
+<div class="caja-page">
+  <div class="page-header">
+    <h2>Gestión de caja</h2>
+    <button class="primary" (click)="openCreateModal()">Nueva caja</button>
+  </div>
+
+  @if (errorMessage) {
+    <p class="error">{{ errorMessage }}</p>
+  }
+
+  @if (successMessage) {
+    <p class="success">{{ successMessage }}</p>
+  }
+
+  <div class="table-card">
+    <h3>Listado de cajas</h3>
+
+    @if (loading) {
+      <p>Cargando cajas...</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Ubicación</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (caja of cajas; track caja.id_caja) {
+            <tr>
+              <td>{{ caja.id_caja }}</td>
+              <td>{{ caja.nombre }}</td>
+              <td>{{ caja.descripcion || '-' }}</td>
+              <td>{{ caja.ubicacion || '-' }}</td>
+              <td>
+                <span [class.active]="caja.estado" [class.inactive]="!caja.estado">
+                  {{ caja.estado ? 'Activa' : 'Inactiva' }}
+                </span>
+              </td>
+              <td class="actions-cell">
+                <button type="button" class="secondary" (click)="openEditModal(caja)">
+                  Editar
+                </button>
+
+                @if (caja.estado) {
+                  <button type="button" class="danger" (click)="changeStatus(caja, false)">
+                    Desactivar
+                  </button>
+                } @else {
+                  <button type="button" class="success-btn" (click)="changeStatus(caja, true)">
+                    Activar
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  @if (showModal) {
+    <div class="modal-backdrop">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>{{ editingId ? 'Editar caja' : 'Registrar caja' }}</h3>
+          <button class="close-btn" (click)="closeModal()">X</button>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="grid">
+            <div>
+              <label>Nombre</label>
+              <input type="text" formControlName="nombre" />
+            </div>
+
+            <div>
+              <label>Descripción</label>
+              <input type="text" formControlName="descripcion" />
+            </div>
+
+            <div class="full-width">
+              <label>Ubicación</label>
+              <input type="text" formControlName="ubicacion" />
+            </div>
+          </div>
+
+          @if (modalErrorMessage) {
+            <p class="error">{{ modalErrorMessage }}</p>
+          }
+
+          <div class="modal-actions">
+            <button type="submit" class="primary" [disabled]="saving">
+              {{ saving ? 'Guardando...' : (editingId ? 'Actualizar' : 'Registrar') }}
+            </button>
+
+            <button type="button" class="secondary" (click)="closeModal()">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

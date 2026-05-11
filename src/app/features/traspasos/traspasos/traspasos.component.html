@@ -1,0 +1,268 @@
+<div class="traspasos-page">
+  <div class="page-header">
+    <h2>Traspasos entre almacenes</h2>
+
+    <button class="primary" type="button" (click)="openCreateModal()">
+      Nuevo traspaso
+    </button>
+  </div>
+
+  @if (errorMessage) {
+    <p class="error">{{ errorMessage }}</p>
+  }
+
+  @if (successMessage) {
+    <p class="success">{{ successMessage }}</p>
+  }
+
+  <div class="table-card">
+    <h3>Listado de traspasos</h3>
+
+    @if (loading) {
+      <p>Cargando traspasos...</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Origen</th>
+            <th>Destino</th>
+            <th>Empleado</th>
+            <th>Fecha</th>
+            <th>Cantidad total</th>
+            <th>Costo total</th>
+            <th>Estado</th>
+            <th>Observación</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (traspaso of traspasos; track traspaso.id_traspaso) {
+            <tr>
+              <td>{{ traspaso.id_traspaso }}</td>
+              <td>{{ getAlmacenText(traspaso.almacenOrigen) }}</td>
+              <td>{{ getAlmacenText(traspaso.almacenDestino) }}</td>
+              <td>{{ getEmpleadoText(traspaso.empleado) }}</td>
+              <td>{{ traspaso.fecha | date:'short' }}</td>
+              <td>{{ getCantidadTotal(traspaso) }}</td>
+              <td>{{ getCostoTotal(traspaso) }}</td>
+              <td>
+                <span [class.active]="traspaso.estado === 'REGISTRADO'" [class.inactive]="traspaso.estado !== 'REGISTRADO'">
+                  {{ traspaso.estado }}
+                </span>
+              </td>
+              <td>{{ traspaso.observacion || '-' }}</td>
+              <td class="actions-cell">
+                <button type="button" class="info-btn" (click)="openDetailModal(traspaso)">
+                  Ver detalle
+                </button>
+              </td>
+            </tr>
+          }
+
+          @if (traspasos.length === 0) {
+            <tr>
+              <td colspan="10" class="empty-cell">
+                No hay traspasos registrados.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  @if (showModal) {
+    <div class="modal-backdrop">
+      <div class="modal modal-lg">
+        <div class="modal-header">
+          <h3>Registrar traspaso FIFO</h3>
+          <button class="close-btn" type="button" (click)="closeModal()">X</button>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="grid">
+            <div>
+              <label>Almacén origen</label>
+              <select formControlName="id_almacen_origen">
+                <option value="">Seleccione</option>
+
+                @for (almacen of almacenes; track almacen.id_almacen) {
+                  <option [value]="almacen.id_almacen">
+                    {{ almacen.nombre }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div>
+              <label>Almacén destino</label>
+              <select formControlName="id_almacen_destino">
+                <option value="">Seleccione</option>
+
+                @for (almacen of almacenes; track almacen.id_almacen) {
+                  <option [value]="almacen.id_almacen">
+                    {{ almacen.nombre }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div class="full-width">
+              <label>Observación</label>
+              <input
+                type="text"
+                formControlName="observacion"
+                placeholder="Ejemplo: Traspaso por reposición de almacén"
+              />
+            </div>
+          </div>
+
+          <div class="detalle-header">
+            <h4>Detalle del traspaso</h4>
+
+            <button type="button" class="secondary" (click)="addDetalle()">
+              Agregar producto
+            </button>
+          </div>
+
+          <div formArrayName="detalles" class="detalle-list">
+            @for (detalle of detalles.controls; track $index) {
+              <div class="detalle-item" [formGroupName]="$index">
+                <div>
+                  <label>Producto</label>
+                  <select formControlName="id_producto">
+                    <option value="">Seleccione producto</option>
+
+                    @for (producto of productos; track producto.id_producto) {
+                      <option [value]="producto.id_producto">
+                        {{ producto.nombre }}
+                      </option>
+                    }
+                  </select>
+                </div>
+
+                <div>
+                  <label>Cantidad</label>
+                  <input
+                    type="number"
+                    formControlName="cantidad"
+                    min="0.01"
+                    step="0.01"
+                  />
+                </div>
+
+                <div class="detalle-actions">
+                  <button type="button" class="danger" (click)="removeDetalle($index)">
+                    Quitar
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+
+          @if (modalErrorMessage) {
+            <p class="error">{{ modalErrorMessage }}</p>
+          }
+
+          <div class="modal-actions">
+            <button type="submit" class="primary" [disabled]="saving">
+              {{ saving ? 'Guardando...' : 'Registrar traspaso' }}
+            </button>
+
+            <button type="button" class="secondary" (click)="closeModal()">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  @if (showDetailModal) {
+    <div class="modal-backdrop">
+      <div class="modal modal-lg">
+        <div class="modal-header">
+          <h3>Detalle del traspaso #{{ selectedTraspaso?.id_traspaso }}</h3>
+          <button class="close-btn" type="button" (click)="closeDetailModal()">X</button>
+        </div>
+
+        <div class="detail-grid">
+          <div>
+            <strong>Almacén origen:</strong>
+            {{ getAlmacenText(selectedTraspaso?.almacenOrigen) }}
+          </div>
+
+          <div>
+            <strong>Almacén destino:</strong>
+            {{ getAlmacenText(selectedTraspaso?.almacenDestino) }}
+          </div>
+
+          <div>
+            <strong>Empleado:</strong>
+            {{ getEmpleadoText(selectedTraspaso?.empleado) }}
+          </div>
+
+          <div>
+            <strong>Fecha:</strong>
+            {{ selectedTraspaso?.fecha | date:'short' }}
+          </div>
+
+          <div>
+            <strong>Estado:</strong>
+            {{ selectedTraspaso?.estado }}
+          </div>
+
+          <div>
+            <strong>Costo total:</strong>
+            {{ getCostoTotal(selectedTraspaso) }}
+          </div>
+
+          <div class="full-width">
+            <strong>Observación:</strong>
+            {{ selectedTraspaso?.observacion || '-' }}
+          </div>
+        </div>
+
+        <div class="detail-card">
+          <h4>Productos traspasados</h4>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Costo total FIFO</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (detalle of selectedTraspaso?.detalles || []; track detalle.id_traspaso_detalle) {
+                <tr>
+                  <td>{{ getProductoText(detalle.producto) }}</td>
+                  <td>{{ detalle.cantidad }}</td>
+                  <td>{{ detalle.costo_total }}</td>
+                </tr>
+              }
+
+              @if (!selectedTraspaso?.detalles || selectedTraspaso?.detalles?.length === 0) {
+                <tr>
+                  <td colspan="3" class="empty-cell">
+                    Este traspaso no tiene detalles.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="secondary" (click)="closeDetailModal()">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

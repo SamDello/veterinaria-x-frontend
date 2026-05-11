@@ -1,0 +1,159 @@
+<div class="historial-page">
+  <div class="page-header">
+    <h2>Historial de atenciones</h2>
+  </div>
+
+  @if (errorMessage) {
+    <p class="error">{{ errorMessage }}</p>
+  }
+
+  <div class="filter-card">
+    <h3>Filtros</h3>
+
+    <form [formGroup]="filtroForm" class="filter-grid">
+      <div>
+        <label>Mascota</label>
+        <select formControlName="id_mascota">
+          <option value="">Todas</option>
+          @for (mascota of mascotas; track mascota.id_mascota) {
+            <option [value]="mascota.id_mascota">
+              {{ mascota.nombre }}
+            </option>
+          }
+        </select>
+      </div>
+
+      <div>
+        <label>Fecha inicio</label>
+        <input type="date" formControlName="fecha_inicio" />
+      </div>
+
+      <div>
+        <label>Fecha fin</label>
+        <input type="date" formControlName="fecha_fin" />
+      </div>
+
+      <div class="filter-actions">
+        <button type="button" class="secondary" (click)="limpiarFiltros()">
+          Limpiar filtros
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="table-card">
+    <h3>Listado del historial</h3>
+
+    @if (loading) {
+      <p>Cargando historial...</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Mascota</th>
+            <th>Empleado</th>
+            <th>Fecha</th>
+            <th>Motivo</th>
+            <th>Servicios</th>
+            <th>Peso</th>
+            <th>Temperatura</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of atencionesFiltradas; track item.id_atencion) {
+            <tr>
+              <td>{{ item.id_atencion }}</td>
+              <td>{{ getMascotaText(item) }}</td>
+              <td>{{ getEmpleadoText(item) }}</td>
+              <td>{{ item.fecha | date:'short' }}</td>
+              <td>{{ item.motivo_consulta || '-' }}</td>
+              <td>{{ getServiciosText(item) }}</td>
+              <td>{{ item.peso || '-' }}</td>
+              <td>{{ item.temperatura || '-' }}</td>
+              <td class="actions-cell">
+                <button type="button" class="info-btn" (click)="openDetailModal(item)">
+                  Ver detalle
+                </button>
+              </td>
+            </tr>
+          }
+
+          @if (atencionesFiltradas.length === 0) {
+            <tr>
+              <td colspan="9" class="empty-cell">No hay atenciones para mostrar.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  @if (showDetailModal) {
+    <div class="modal-backdrop">
+      <div class="modal modal-lg">
+        <div class="modal-header">
+          <h3>Detalle de atención #{{ selectedAtencion?.id_atencion }}</h3>
+          <button class="close-btn" (click)="closeDetailModal()">X</button>
+        </div>
+
+        <div class="detail-grid">
+          <div><strong>Mascota:</strong> {{ getMascotaText(selectedAtencion) }}</div>
+          <div><strong>Empleado:</strong> {{ getEmpleadoText(selectedAtencion) }}</div>
+          <div><strong>Fecha:</strong> {{ selectedAtencion?.fecha | date:'short' }}</div>
+          <div><strong>Peso:</strong> {{ selectedAtencion?.peso || '-' }}</div>
+          <div><strong>Temperatura:</strong> {{ selectedAtencion?.temperatura || '-' }}</div>
+          <div><strong>Estado:</strong> {{ selectedAtencion?.estado ? 'Activa' : 'Inactiva' }}</div>
+
+          <div class="full-width">
+            <strong>Motivo de consulta:</strong>
+            <p>{{ selectedAtencion?.motivo_consulta || '-' }}</p>
+          </div>
+
+          <div class="full-width">
+            <strong>Diagnóstico:</strong>
+            <p>{{ selectedAtencion?.diagnostico || '-' }}</p>
+          </div>
+
+          <div class="full-width">
+            <strong>Tratamiento:</strong>
+            <p>{{ selectedAtencion?.tratamiento || '-' }}</p>
+          </div>
+
+          <div class="full-width">
+            <strong>Observaciones:</strong>
+            <p>{{ selectedAtencion?.observaciones || '-' }}</p>
+          </div>
+        </div>
+
+        <div class="services-detail">
+          <h4>Servicios aplicados</h4>
+
+          @if (selectedAtencion?.servicios?.length > 0) {
+            <table>
+              <thead>
+                <tr>
+                  <th>Servicio</th>
+                  <th>Detalle</th>
+                  <th>Observación</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (servicio of selectedAtencion.servicios; track servicio.id_servicio) {
+                  <tr>
+                    <td>{{ servicio.nombre }}</td>
+                    <td>{{ getServicioDetalleText(servicio) }}</td>
+                    <td>{{ servicio.AtencionServicio?.observacion || '-' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          } @else {
+            <p>No hay servicios asociados.</p>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

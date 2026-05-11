@@ -1,0 +1,23 @@
+<div class="login-container">
+  <form [formGroup]="form" (ngSubmit)="submit()" class="login-card">
+    <h2>Iniciar sesión</h2>
+
+    <div>
+      <label>Correo</label>
+      <input type="email" formControlName="correo" />
+    </div>
+
+    <div>
+      <label>Contraseña</label>
+      <input type="text" formControlName="password" />
+    </div>
+
+    @if (errorMessage) {
+      <p class="error">{{ errorMessage }}</p>
+    }
+
+    <button type="submit" [disabled]="loading">
+      {{ loading ? 'Ingresando...' : 'Ingresar' }}
+    </button>
+  </form>
+</div>

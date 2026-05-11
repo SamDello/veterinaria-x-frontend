@@ -1,0 +1,486 @@
+<div class="ventas-page">
+  <div class="page-header">
+    <h2>Gestión de ventas</h2>
+
+    <div class="header-actions">
+      <button class="primary" type="button" (click)="openProductosModal()">
+        Nueva venta de productos
+      </button>
+
+      <button class="success-btn" type="button" (click)="openServiciosModal()">
+        Nueva venta de servicios
+      </button>
+    </div>
+  </div>
+
+  @if (pageErrorMessage) {
+    <p class="error">{{ pageErrorMessage }}</p>
+  }
+
+  @if (pageSuccessMessage) {
+    <p class="success">{{ pageSuccessMessage }}</p>
+  }
+
+  <div class="filter-card">
+    <h3>Filtros de ventas</h3>
+
+    <form [formGroup]="filtrosVentasForm" class="filter-grid simple-filter-grid">
+      <div>
+        <label>Buscar por cliente o empleado</label>
+        <input
+          type="text"
+          formControlName="texto"
+          placeholder="Ejemplo: David, Samuel, Juan Pérez..."
+        />
+      </div>
+
+      <div class="filter-actions">
+        <button type="button" class="secondary" (click)="limpiarFiltrosVentas()">
+          Limpiar filtros
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="table-card">
+    <h3>Listado de ventas</h3>
+
+    @if (loading) {
+      <p>Cargando ventas...</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>Empleado</th>
+            <th>Mascota</th>
+            <th>Fecha</th>
+            <th>Detalle</th>
+            <th>Subtotal</th>
+            <th>Descuento</th>
+            <th>Total</th>
+            <th>Observación</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (venta of ventasFiltradas; track venta.id_venta) {
+            <tr>
+              <td>{{ venta.id_venta }}</td>
+              <td>{{ venta.cliente?.nombre }} {{ venta.cliente?.apellidos || '' }}</td>
+              <td>{{ venta.empleado?.nombre }} {{ venta.empleado?.apellidos || '' }}</td>
+              <td>{{ venta.atencion?.mascota?.nombre || '-' }}</td>
+              <td>{{ venta.fecha | date:'short' }}</td>
+              <td>{{ getDetalleServiciosVentaText(venta) }}</td>
+              <td>{{ venta.subtotal }}</td>
+              <td>{{ venta.descuento }}</td>
+              <td>{{ venta.total }}</td>
+              <td>{{ venta.observacion || '-' }}</td>
+              <td class="actions-cell">
+                <button type="button" class="info-btn" (click)="openQrModal(venta)">
+                  Pagar
+                </button>
+              </td>
+            </tr>
+          }
+
+          @if (ventasFiltradas.length === 0) {
+            <tr>
+              <td colspan="11" class="empty-cell">
+                No hay ventas que coincidan con los filtros.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  @if (showProductosModal) {
+    <div class="modal-backdrop">
+      <div class="modal modal-lg">
+        <div class="modal-header">
+          <h3>Registrar venta de productos</h3>
+          <button class="close-btn" type="button" (click)="closeProductosModal()">X</button>
+        </div>
+
+        <form [formGroup]="productosForm" (ngSubmit)="submitVentaProductos()">
+          <div class="grid">
+            <div>
+              <label>Cliente</label>
+              <select formControlName="id_cliente">
+                <option value="">Seleccione</option>
+                @for (cliente of clientes; track cliente.id_cliente) {
+                  <option [value]="cliente.id_cliente">
+                    {{ cliente.nombre }} {{ cliente.apellidos || '' }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div>
+              <label>Descuento</label>
+              <input type="number" formControlName="descuento" step="0.01" min="0" />
+            </div>
+
+            <div class="full-width">
+              <label>Observación</label>
+              <input type="text" formControlName="observacion" />
+            </div>
+          </div>
+
+          <div class="detalle-header">
+            <h4>Detalle de productos</h4>
+
+            <button type="button" class="secondary" (click)="addProductoDetalle()">
+              Agregar producto
+            </button>
+          </div>
+
+          <div formArrayName="productos" class="detalle-list">
+            @for (detalle of productosArray.controls; track $index) {
+              <div class="detalle-item producto-detalle-item" [formGroupName]="$index">
+                <div>
+                  <label>Producto</label>
+                  <select formControlName="id_producto" (change)="onProductoChange($index)">
+                    <option value="">Seleccione producto</option>
+                    @for (producto of productos; track producto.id_producto) {
+                      <option [value]="producto.id_producto">
+                        {{ producto.nombre }}
+                      </option>
+                    }
+                  </select>
+                </div>
+
+                <div>
+                  <label>Almacén</label>
+                  <select formControlName="id_almacen" (change)="onAlmacenProductoChange($index)">
+                    <option value="">Seleccione almacén</option>
+
+                    @for (almacenStock of stockAlmacenesPorDetalle[$index] || []; track almacenStock.id_almacen) {
+                      <option [value]="almacenStock.id_almacen">
+                        {{ almacenStock.almacen }} - Stock: {{ almacenStock.stock_actual }}
+                      </option>
+                    }
+                  </select>
+                </div>
+
+                <!-- <div>
+                  <label>Stock disponible</label>
+
+                  @if (stockLoadingPorDetalle[$index]) {
+                    <div class="stock-pill stock-muted">
+                      Consultando...
+                    </div>
+                  } @else if (stockDisponiblePorDetalle[$index] !== null && stockDisponiblePorDetalle[$index] !== undefined) {
+                    <div
+                      class="stock-pill"
+                      [class.stock-ok]="(stockDisponiblePorDetalle[$index] || 0) > 0"
+                      [class.stock-error]="(stockDisponiblePorDetalle[$index] || 0) <= 0"
+                    >
+                      {{ stockDisponiblePorDetalle[$index] }}
+                    </div>
+                  } @else {
+                    <div class="stock-pill stock-muted">
+
+                    </div>
+                  }
+                </div> -->
+
+                <div>
+                  <label>Cantidad</label>
+                  <input
+                    type="number"
+                    formControlName="cantidad"
+                    placeholder="Cantidad"
+                    min="1"
+                    (input)="onCantidadProductoChange($index)"
+                  />
+                </div>
+
+                <div>
+                  <label>Precio unitario</label>
+                  <input
+                    type="number"
+                    formControlName="precio_unitario"
+                    placeholder="Precio unitario"
+                    step="0.01"
+                    min="0"
+                  />
+                </div>
+
+                <div>
+                  <label>Subtotal</label>
+                  <input type="text" [value]="calcularSubtotal(detalle.value)" readonly />
+                </div>
+
+                <div class="detalle-actions">
+                  <button type="button" class="danger" (click)="removeProductoDetalle($index)">
+                    Quitar
+                  </button>
+                </div>
+
+                @if (stockMensajePorDetalle[$index]) {
+                  <div class="stock-message">
+                    {{ stockMensajePorDetalle[$index] }}
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          @if (productosErrorMessage) {
+            <p class="error">{{ productosErrorMessage }}</p>
+          }
+
+          @if (productosSuccessMessage) {
+            <p class="success">{{ productosSuccessMessage }}</p>
+          }
+
+          <div class="total-box">
+            <strong>Total general: {{ getTotalProductos() }}</strong>
+          </div>
+
+          <div class="modal-actions">
+            <button type="submit" class="primary" [disabled]="saving">
+              {{ saving ? 'Guardando...' : 'Registrar venta de productos' }}
+            </button>
+
+            <button type="button" class="secondary" (click)="closeProductosModal()">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  @if (showServiciosModal) {
+    <div class="modal-backdrop">
+      <div class="modal modal-lg">
+        <div class="modal-header">
+          <h3>Registrar venta de servicios</h3>
+          <button class="close-btn" type="button" (click)="closeServiciosModal()">X</button>
+        </div>
+
+        <form [formGroup]="serviciosForm" (ngSubmit)="submitVentaServicios()">
+          <div class="grid">
+            <div>
+              <label>Cliente</label>
+              <select formControlName="id_cliente">
+                <option value="">Seleccione</option>
+                @for (cliente of clientes; track cliente.id_cliente) {
+                  <option [value]="cliente.id_cliente">
+                    {{ cliente.nombre }} {{ cliente.apellidos || '' }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div>
+              <label>Mascota</label>
+              <select formControlName="id_mascota">
+                <option value="">Seleccione</option>
+                @for (mascota of mascotasCliente; track mascota.id_mascota) {
+                  <option [value]="mascota.id_mascota">
+                    {{ mascota.nombre }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div class="full-width">
+              <label>Atención pendiente</label>
+              <select formControlName="id_atencion">
+                <option value="">Seleccione</option>
+                @for (atencion of atencionesPendientes; track atencion.id_atencion) {
+                  <option [value]="atencion.id_atencion">
+                    Atención #{{ atencion.id_atencion }} -
+                    {{ atencion.fecha | date:'short' }} -
+                    {{ atencion.motivo_consulta || 'Sin motivo' }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div>
+              <label>Descuento</label>
+              <input type="number" formControlName="descuento" step="0.01" min="0" />
+            </div>
+
+            <div>
+              <label>Observación</label>
+              <input type="text" formControlName="observacion" />
+            </div>
+          </div>
+
+          <div class="detail-card">
+            <h4>Detalle de servicios de la atención</h4>
+
+            @if (atencionSeleccionada) {
+              <div class="detail-meta">
+                <p><strong>Atención:</strong> #{{ atencionSeleccionada.id_atencion }}</p>
+                <p><strong>Fecha:</strong> {{ atencionSeleccionada.fecha | date:'short' }}</p>
+                <p><strong>Motivo:</strong> {{ atencionSeleccionada.motivo_consulta || '-' }}</p>
+              </div>
+
+              <table>
+                <thead>
+                  <tr>
+                    <th>Servicio</th>
+                    <th>Cantidad</th>
+                    <th>Precio unitario</th>
+                    <th>Subtotal</th>
+                    <th>Observación</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  @for (item of detalleServiciosAtencion; track item.id_servicio) {
+                    <tr>
+                      <td>{{ item.nombre }}</td>
+                      <td>{{ item.AtencionServicio?.cantidad }}</td>
+                      <td>{{ item.AtencionServicio?.precio_unitario }}</td>
+                      <td>{{ item.AtencionServicio?.subtotal }}</td>
+                      <td>{{ item.AtencionServicio?.observacion || '-' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+
+              <div class="total-box">
+                <strong>Subtotal: {{ subtotalServicios }}</strong>
+                <strong>Total general: {{ totalServicios }}</strong>
+              </div>
+            } @else {
+              <p>Selecciona cliente, mascota y atención para ver el detalle.</p>
+            }
+          </div>
+
+          @if (serviciosErrorMessage) {
+            <p class="error">{{ serviciosErrorMessage }}</p>
+          }
+
+          @if (serviciosSuccessMessage) {
+            <p class="success">{{ serviciosSuccessMessage }}</p>
+          }
+
+          <div class="modal-actions">
+            <button type="submit" class="primary" [disabled]="saving">
+              {{ saving ? 'Guardando...' : 'Registrar venta de servicios' }}
+            </button>
+
+            <button type="button" class="secondary" (click)="closeServiciosModal()">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  @if (showQrModal) {
+    <div class="modal-backdrop">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>Pagar - Venta #{{ selectedVentaQr?.id_venta }}</h3>
+          <button class="close-btn" type="button" (click)="closeQrModal()">X</button>
+        </div>
+
+        <div class="qr-box">
+          <p>
+            <strong>Cliente:</strong>
+            {{ selectedVentaQr?.cliente?.nombre }}
+            {{ selectedVentaQr?.cliente?.apellidos || '' }}
+          </p>
+
+          <p>
+            <strong>Total:</strong>
+            {{ selectedVentaQr?.total }}
+          </p>
+
+          <div class="payment-options">
+            <button
+              class="success-btn"
+              type="button"
+              [disabled]="qrLoading"
+              (click)="pagarEfectivo()"
+            >
+              EFECTIVO
+            </button>
+
+            <button
+              class="primary"
+              type="button"
+              [disabled]="qrLoading"
+              (click)="generarQr()"
+            >
+              GENERAR QR
+            </button>
+
+            <button
+              class="danger"
+              type="button"
+              [disabled]="qrLoading"
+              (click)="anularPagoVenta()"
+            >
+              CANCELAR
+            </button>
+          </div>
+
+          @if (qrData) {
+            <div class="qr-actions">
+              <button
+                class="secondary"
+                type="button"
+                [disabled]="qrLoading"
+                (click)="consultarEstadoQr()"
+              >
+                Consultar estado
+              </button>
+            </div>
+          }
+
+          @if (qrLoading) {
+            <p>Procesando...</p>
+          }
+
+          @if (qrErrorMessage) {
+            <p class="error">{{ qrErrorMessage }}</p>
+          }
+
+          @if (qrSuccessMessage) {
+            <p class="success">{{ qrSuccessMessage }}</p>
+          }
+
+          @if (qrData) {
+            <div class="qr-result">
+              <p><strong>Estado Libélula:</strong> {{ getQrEstado() }}</p>
+
+              @if (getQrPaymentUrl()) {
+                <p>
+                  <strong>Link de pago:</strong>
+                  <a [href]="getQrPaymentUrl()" target="_blank">Abrir pago QR</a>
+                </p>
+              }
+
+              @if (getQrImageUrl()) {
+                <div class="qr-image">
+                  <img [src]="getQrImageUrl()" alt="QR Libélula" />
+                </div>
+              }
+
+              @if (!getQrImageUrl() && getQrBase64()) {
+                <div class="qr-image">
+                  <img [src]="'data:image/png;base64,' + getQrBase64()" alt="QR Libélula" />
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

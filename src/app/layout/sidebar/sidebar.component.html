@@ -1,0 +1,184 @@
+<aside class="sidebar">
+  <nav class="menu">
+    <a routerLink="/dashboard" routerLinkActive="active" class="single-link">
+      Dashboard
+    </a>
+
+    @if (canShowAdministracion()) {
+      <div class="menu-group">
+        <button type="button" class="menu-title" (click)="toggleMenu('administracion')">
+          <span>Administración</span>
+          <span>{{ expandedMenus['administracion'] ? '▾' : '▸' }}</span>
+        </button>
+
+        @if (expandedMenus['administracion']) {
+          <div class="submenu">
+            @if (hasPermission('GESTIONAR_USUARIOS')) {
+              <a routerLink="/usuarios" routerLinkActive="active">Usuarios</a>
+            }
+
+            @if (hasPermission('GESTIONAR_ROLES')) {
+              <a routerLink="/roles" routerLinkActive="active">Roles</a>
+            }
+
+            <!-- @if (hasPermission('GESTIONAR_PERMISOS')) {
+              <a routerLink="/permisos" routerLinkActive="active">Permisos</a>
+            } -->
+
+            @if (hasPermission('GESTIONAR_EMPLEADOS')) {
+              <a routerLink="/empleados" routerLinkActive="active">Empleados</a>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    @if (canShowVeterinaria()) {
+      <div class="menu-group">
+        <button type="button" class="menu-title" (click)="toggleMenu('veterinaria')">
+          <span>Clientes y veterinaria</span>
+          <span>{{ expandedMenus['veterinaria'] ? '▾' : '▸' }}</span>
+        </button>
+
+        @if (expandedMenus['veterinaria']) {
+          <div class="submenu">
+            @if (hasPermission('GESTIONAR_CLIENTES')) {
+              <a routerLink="/clientes" routerLinkActive="active">Clientes</a>
+            }
+
+            @if (hasPermission('GESTIONAR_MASCOTAS')) {
+              <a routerLink="/mascotas" routerLinkActive="active">Mascotas</a>
+            }
+
+            @if (hasPermission('GESTIONAR_ESPECIES')) {
+              <a routerLink="/especies" routerLinkActive="active">Especies</a>
+            }
+
+            @if (hasPermission('GESTIONAR_RAZAS')) {
+              <a routerLink="/razas" routerLinkActive="active">Razas</a>
+            }
+
+            @if (hasPermission('GESTIONAR_SERVICIOS_VETERINARIOS')) {
+              <a routerLink="/servicios-veterinarios" routerLinkActive="active">Servicios veterinarios</a>
+            }
+
+            @if (hasPermission('REGISTRAR_ATENCION_VETERINARIA')) {
+              <a routerLink="/atenciones-veterinarias" routerLinkActive="active">Atenciones veterinarias</a>
+            }
+
+            @if (hasPermission('REGISTRAR_ATENCION_VETERINARIA')) {
+              <a routerLink="/historial-atenciones" routerLinkActive="active">Historial de atenciones</a>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    @if (canShowComercial()) {
+      <div class="menu-group">
+        <button type="button" class="menu-title" (click)="toggleMenu('comercial')">
+          <span>Comercial</span>
+          <span>{{ expandedMenus['comercial'] ? '▾' : '▸' }}</span>
+        </button>
+
+        @if (expandedMenus['comercial']) {
+          <div class="submenu">
+            @if (hasPermission('REGISTRAR_VENTAS_PRODUCTOS') || hasPermission('REGISTRAR_VENTAS_SERVICIOS')) {
+              <a routerLink="/ventas" routerLinkActive="active">Ventas</a>
+            }
+
+            @if (hasPermission('GESTIONAR_PAGOS')) {
+              <a routerLink="/pagos" routerLinkActive="active">Pagos</a>
+            }
+
+            @if (hasPermission('REGISTRAR_COMPRAS')) {
+              <a routerLink="/compras" routerLinkActive="active">Compras</a>
+            }
+
+            @if (hasPermission('GESTIONAR_PROVEEDORES')) {
+              <a routerLink="/proveedores" routerLinkActive="active">Proveedores</a>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    @if (canShowInventario()) {
+      <div class="menu-group">
+        <button type="button" class="menu-title" (click)="toggleMenu('inventario')">
+          <span>Inventario y almacén</span>
+          <span>{{ expandedMenus['inventario'] ? '▾' : '▸' }}</span>
+        </button>
+
+        @if (expandedMenus['inventario']) {
+          <div class="submenu">
+            @if (hasPermission('GESTIONAR_PRODUCTOS')) {
+              <a routerLink="/productos" routerLinkActive="active">Productos</a>
+            }
+
+            @if (hasPermission('GESTIONAR_CATEGORIAS')) {
+              <a routerLink="/categorias" routerLinkActive="active">Categorías</a>
+            }
+
+            @if (hasPermission('GESTIONAR_MARCAS')) {
+              <a routerLink="/marcas" routerLinkActive="active">Marcas</a>
+            }
+
+            @if (hasPermission('GESTIONAR_ALMACENES')) {
+              <a routerLink="/almacenes" routerLinkActive="active">Almacenes</a>
+            }
+
+            @if (hasPermission('GESTIONAR_STOCK')) {
+              <a routerLink="/stock" routerLinkActive="active">Stock</a>
+            }
+
+            @if (hasPermission('GESTIONAR_TRASPASOS')) {
+              <a routerLink="/traspasos" routerLinkActive="active">Traspasos</a>
+            }
+
+            @if (hasPermission('GESTIONAR_MOVIMIENTOS_INVENTARIO')) {
+              <a routerLink="/movimientos-inventario" routerLinkActive="active">Movimientos de inventario</a>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    @if (canShowCajaReportes()) {
+      <div class="menu-group">
+        <button type="button" class="menu-title" (click)="toggleMenu('cajaReportes')">
+          <span>Caja y reportes</span>
+          <span>{{ expandedMenus['cajaReportes'] ? '▾' : '▸' }}</span>
+        </button>
+
+        @if (expandedMenus['cajaReportes']) {
+          <div class="submenu">
+            @if (hasPermission('GESTIONAR_CAJA')) {
+              <a routerLink="/caja" routerLinkActive="active">Caja</a>
+            }
+
+            @if (hasPermission('REGISTRAR_APERTURA_CAJA')) {
+              <a routerLink="/apertura-caja" routerLinkActive="active">Apertura de caja</a>
+            }
+
+            @if (hasPermission('REGISTRAR_CIERRE_CAJA')) {
+              <a routerLink="/cierre-caja" routerLinkActive="active">Cierre de caja</a>
+            }
+
+            @if (hasPermission('GESTIONAR_MOVIMIENTOS_CAJA')) {
+              <a routerLink="/movimientos-caja" routerLinkActive="active">Movimientos de caja</a>
+            }
+
+            @if (hasPermission('GESTIONAR_METODOS_PAGO')) {
+              <a routerLink="/metodos-pago" routerLinkActive="active">Métodos de pago</a>
+            }
+
+            @if (hasPermission('CONSULTAR_REPORTES_OPERATIVOS')) {
+              <a routerLink="/reportes" routerLinkActive="active">Reportes</a>
+            }
+          </div>
+        }
+      </div>
+    }
+  </nav>
+</aside>

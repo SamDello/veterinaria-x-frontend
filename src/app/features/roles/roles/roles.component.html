@@ -1,0 +1,144 @@
+<div class="roles-page">
+  <div class="page-header">
+    <h2>Gestión de roles</h2>
+    <button class="primary" (click)="openCreateModal()">Nuevo rol</button>
+  </div>
+
+  @if (errorMessage) {
+    <p class="error">{{ errorMessage }}</p>
+  }
+
+  @if (successMessage) {
+    <p class="success">{{ successMessage }}</p>
+  }
+
+  <div class="table-card">
+    <h3>Listado de roles</h3>
+
+    @if (loading) {
+      <p>Cargando roles...</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Permisos</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (rol of roles; track rol.id_rol) {
+            <tr>
+              <td>{{ rol.id_rol }}</td>
+              <td>{{ rol.nombre }}</td>
+              <td>{{ rol.descripcion || '-' }}</td>
+              <td>
+                @if (rol.permisos?.length) {
+                  {{ rol.permisos.length }} permisos
+                } @else {
+                  Sin permisos
+                }
+              </td>
+              <td>
+                <span [class.active]="rol.estado" [class.inactive]="!rol.estado">
+                  {{ rol.estado ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td class="actions-cell">
+                <button type="button" class="secondary" (click)="openEditModal(rol)">
+                  Editar
+                </button>
+
+                <button type="button" class="info-btn" (click)="openPermisosModal(rol)">
+                  Permisos
+                </button>
+
+                @if (rol.estado) {
+                  <button type="button" class="danger" (click)="changeStatus(rol, false)">
+                    Desactivar
+                  </button>
+                } @else {
+                  <button type="button" class="success-btn" (click)="changeStatus(rol, true)">
+                    Activar
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  @if (showModal) {
+    <div class="modal-backdrop">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>{{ editingId ? 'Editar rol' : 'Registrar rol' }}</h3>
+          <button class="close-btn" (click)="closeModal()">X</button>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="grid">
+            <div>
+              <label>Nombre</label>
+              <input type="text" formControlName="nombre" />
+            </div>
+
+            <div>
+              <label>Descripción</label>
+              <input type="text" formControlName="descripcion" />
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button type="submit" class="primary" [disabled]="saving">
+              {{ saving ? 'Guardando...' : (editingId ? 'Actualizar' : 'Registrar') }}
+            </button>
+
+            <button type="button" class="secondary" (click)="closeModal()">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  @if (showPermisosModal) {
+    <div class="modal-backdrop">
+      <div class="modal modal-lg">
+        <div class="modal-header">
+          <h3>Asignar permisos a {{ selectedRol?.nombre }}</h3>
+          <button class="close-btn" (click)="closePermisosModal()">X</button>
+        </div>
+
+        <div class="permisos-grid">
+          @for (permiso of permisos; track permiso.id_permiso) {
+            <label class="permiso-item">
+              <input
+                type="checkbox"
+                [checked]="isPermisoSelected(permiso.id_permiso)"
+                (change)="togglePermiso(permiso.id_permiso, $event)"
+              />
+              <span>{{ permiso.nombre }}</span>
+            </label>
+          }
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="primary" [disabled]="saving" (click)="savePermisos()">
+            {{ saving ? 'Guardando...' : 'Guardar permisos' }}
+          </button>
+
+          <button type="button" class="secondary" (click)="closePermisosModal()">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

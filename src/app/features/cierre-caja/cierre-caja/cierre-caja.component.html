@@ -1,0 +1,107 @@
+<div class="cierre-caja-page">
+  <div class="page-header">
+    <h2>Cierre de caja</h2>
+    <button class="primary" (click)="openCreateModal()">Nuevo cierre</button>
+  </div>
+
+  @if (errorMessage) {
+    <p class="error">{{ errorMessage }}</p>
+  }
+
+  @if (successMessage) {
+    <p class="success">{{ successMessage }}</p>
+  }
+
+  <div class="table-card">
+    <h3>Listado de cierres</h3>
+
+    @if (loading) {
+      <p>Cargando cierres...</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>ID Cierre</th>
+            <th>ID Apertura</th>
+            <th>Caja</th>
+            <th>Empleado apertura</th>
+            <th>Empleado cierre</th>
+            <th>Fecha cierre</th>
+            <th>Monto final</th>
+            <th>Observación</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (cierre of cierres; track cierre.id_cierre_caja) {
+            <tr>
+              <td>{{ cierre.id_cierre_caja }}</td>
+              <td>{{ cierre.id_apertura_caja }}</td>
+              <td>{{ getCajaText(cierre) }}</td>
+              <td>{{ getEmpleadoAperturaText(cierre) }}</td>
+              <td>{{ getEmpleadoCierreText(cierre) }}</td>
+              <td>{{ cierre.fecha_cierre | date:'short' }}</td>
+              <td>{{ cierre.monto_final }}</td>
+              <td>{{ cierre.observacion || '-' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  @if (showModal) {
+    <div class="modal-backdrop">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>Registrar cierre de caja</h3>
+          <button class="close-btn" (click)="closeModal()">X</button>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="grid">
+            <div>
+              <label>Apertura de caja</label>
+              <select formControlName="id_apertura_caja">
+                <option value="">Seleccione</option>
+                @for (apertura of aperturasAbiertas; track apertura.id_apertura_caja) {
+                  <option [value]="apertura.id_apertura_caja">
+                    {{ getAperturaOptionText(apertura) }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div>
+              <label>Monto final</label>
+              <input type="number" formControlName="monto_final" min="0" step="0.01" />
+            </div>
+
+            <div class="full-width">
+              <label>Empleado</label>
+              <input type="text" [value]="getEmpleadoSesionText()" readonly />
+            </div>
+
+            <div class="full-width">
+              <label>Observación</label>
+              <input type="text" formControlName="observacion" />
+            </div>
+          </div>
+
+          @if (modalErrorMessage) {
+            <p class="error">{{ modalErrorMessage }}</p>
+          }
+
+          <div class="modal-actions">
+            <button type="submit" class="primary" [disabled]="saving">
+              {{ saving ? 'Guardando...' : 'Registrar cierre' }}
+            </button>
+
+            <button type="button" class="secondary" (click)="closeModal()">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

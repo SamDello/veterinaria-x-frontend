@@ -1,0 +1,319 @@
+<div class="reportes-page">
+  <div class="page-header">
+    <h2>Consultas y reportes</h2>
+  </div>
+
+  <div class="filter-card">
+    <h3>Filtros del reporte</h3>
+
+    <form [formGroup]="form" class="filter-grid">
+      <div>
+        <label>Tipo de reporte</label>
+        <select formControlName="tipo">
+          <option value="ventas">Reporte de ventas</option>
+          <option value="compras">Reporte de compras</option>
+          <option value="stock">Reporte de stock</option>
+          <option value="atenciones">Reporte de atenciones</option>
+          <option value="pagos">Reporte de pagos</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Fecha inicio</label>
+        <input type="date" formControlName="fecha_inicio" />
+      </div>
+
+      <div>
+        <label>Fecha fin</label>
+        <input type="date" formControlName="fecha_fin" />
+      </div>
+
+      @if (isStock()) {
+        <div>
+          <label>ID almacén</label>
+          <input type="number" formControlName="id_almacen" min="1" />
+        </div>
+
+        <div class="checkbox-field">
+          <label>
+            <input type="checkbox" formControlName="stock_bajo" />
+            Solo stock bajo
+          </label>
+        </div>
+      }
+
+      @if (isAtenciones()) {
+        <div>
+          <label>ID mascota</label>
+          <input type="number" formControlName="id_mascota" min="1" />
+        </div>
+      }
+    </form>
+
+    <div class="action-row">
+      <button class="primary" (click)="consultar()" [disabled]="loading">
+        {{ loading ? 'Consultando...' : 'Consultar' }}
+      </button>
+
+      <button class="secondary" (click)="limpiar()">
+        Limpiar
+      </button>
+
+      <button class="info-btn" (click)="exportarPdf()" [disabled]="exportingPdf">
+        {{ exportingPdf ? 'Exportando...' : 'Exportar PDF' }}
+      </button>
+
+      <button class="success-btn" (click)="openMailModal()">
+        Enviar por correo
+      </button>
+    </div>
+  </div>
+
+  @if (errorMessage) {
+    <p class="error">{{ errorMessage }}</p>
+  }
+
+  @if (successMessage) {
+    <p class="success">{{ successMessage }}</p>
+  }
+
+  @if (resumen) {
+    <div class="summary-card">
+      <h3>Resumen</h3>
+      <p><strong>Total registros:</strong> {{ resumen.total_registros }}</p>
+
+      @if (resumen.total_ventas !== null) {
+        <p><strong>Total ventas:</strong> {{ resumen.total_ventas }}</p>
+      }
+
+      @if (resumen.total_compras !== null) {
+        <p><strong>Total compras:</strong> {{ resumen.total_compras }}</p>
+      }
+
+      @if (resumen.total_pagos !== null) {
+        <p><strong>Total pagos:</strong> {{ resumen.total_pagos }}</p>
+      }
+
+      @if (resumen.resumen_estados) {
+        <p><strong>Pagados:</strong> {{ resumen.resumen_estados.pagado }}</p>
+        <p><strong>Pendientes:</strong> {{ resumen.resumen_estados.pendiente }}</p>
+        <p><strong>Anulados:</strong> {{ resumen.resumen_estados.anulado }}</p>
+        <p><strong>Expirados:</strong> {{ resumen.resumen_estados.expirado }}</p>
+      }
+    </div>
+  }
+
+  <div class="table-card">
+    <h3>Resultados</h3>
+
+    @if (isVentas()) {
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Fecha</th>
+            <th>Cliente</th>
+            <th>Empleado</th>
+            <th>Subtotal</th>
+            <th>Descuento</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of resultados; track item.id_venta) {
+            <tr>
+              <td>{{ item.id_venta }}</td>
+              <td>{{ item.fecha | date:'short' }}</td>
+              <td>{{ item.cliente?.nombre }} {{ item.cliente?.apellidos || '' }}</td>
+              <td>{{ item.empleado?.nombre }} {{ item.empleado?.apellidos || '' }}</td>
+              <td>{{ item.subtotal }}</td>
+              <td>{{ item.descuento }}</td>
+              <td>{{ item.total }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+
+    @if (isCompras()) {
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Fecha</th>
+            <th>Empleado</th>
+            <th>Almacén</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of resultados; track item.id_compra) {
+            <tr>
+              <td>{{ item.id_compra }}</td>
+              <td>{{ item.fecha | date:'short' }}</td>
+              <td>{{ item.empleado?.nombre }} {{ item.empleado?.apellidos || '' }}</td>
+              <td>{{ item.almacen?.nombre || '-' }}</td>
+              <td>{{ item.total }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+
+    @if (isStock()) {
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Producto</th>
+            <th>Almacén</th>
+            <th>Stock actual</th>
+            <th>Stock mínimo</th>
+            <th>Stock máximo</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of resultados; track item.id_stock) {
+            <tr>
+              <td>{{ item.id_stock }}</td>
+              <td>{{ item.producto?.nombre || '-' }}</td>
+              <td>{{ item.almacen?.nombre || '-' }}</td>
+              <td>{{ item.stock_actual }}</td>
+              <td>{{ item.stock_minimo }}</td>
+              <td>{{ item.stock_maximo }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+
+    @if (isAtenciones()) {
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Fecha</th>
+            <th>Mascota</th>
+            <th>Cliente</th>
+            <th>Empleado</th>
+            <th>Motivo</th>
+            <th>Diagnóstico</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of resultados; track item.id_atencion) {
+            <tr>
+              <td>{{ item.id_atencion }}</td>
+              <td>{{ item.fecha | date:'short' }}</td>
+              <td>{{ item.mascota?.nombre || '-' }}</td>
+              <td>{{ item.mascota?.cliente?.nombre }} {{ item.mascota?.cliente?.apellidos || '' }}</td>
+              <td>{{ item.empleado?.nombre }} {{ item.empleado?.apellidos || '' }}</td>
+              <td>{{ item.motivo_consulta || '-' }}</td>
+              <td>{{ item.diagnostico || '-' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+
+    @if (isPagos()) {
+  <div>
+    <label>Estado de pago</label>
+    <select formControlName="estado_pago">
+      <option value="">Todos</option>
+      <option value="PAGADO">PAGADO</option>
+      <option value="PENDIENTE">PENDIENTE</option>
+      <option value="ANULADO">ANULADO</option>
+      <option value="EXPIRADO">EXPIRADO</option>
+    </select>
+  </div>
+}
+
+@if (isPagos()) {
+  <table>
+    <thead>
+      <tr>
+        <th>ID Pago</th>
+        <th>Fecha</th>
+        <th>ID Venta</th>
+        <th>Cliente</th>
+        <th>Empleado</th>
+        <th>Método</th>
+        <th>Monto</th>
+        <th>Estado</th>
+        <th>Referencia</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (item of resultados; track item.id_pago) {
+        <tr>
+          <td>{{ item.id_pago }}</td>
+          <td>{{ item.fecha | date:'short' }}</td>
+          <td>{{ item.venta?.id_venta || item.id_venta }}</td>
+          <td>{{ item.venta?.cliente?.nombre }} {{ item.venta?.cliente?.apellidos || '' }}</td>
+          <td>{{ item.venta?.empleado?.nombre }} {{ item.venta?.empleado?.apellidos || '' }}</td>
+          <td>{{ item.metodoPago?.nombre || '-' }}</td>
+          <td>{{ item.monto }}</td>
+          <td>{{ item.estado }}</td>
+          <td>{{ item.referencia_externa || '-' }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}
+
+    @if (!loading && resultados.length === 0) {
+      <p>No hay resultados para mostrar.</p>
+    }
+  </div>
+
+  @if (showMailModal) {
+    <div class="modal-backdrop">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>Enviar reporte por correo</h3>
+          <button class="close-btn" (click)="closeMailModal()">X</button>
+        </div>
+
+        <form [formGroup]="mailForm" (ngSubmit)="enviarCorreo()">
+          <div class="grid">
+            <div class="full-width">
+              <label>Correos destino</label>
+              <input
+                type="text"
+                formControlName="correo"
+                placeholder="correo1@gmail.com, correo2@gmail.com"
+              />
+
+              <small class="help-text">
+                Puede enviar a varios correos separándolos con coma.
+              </small>
+            </div>
+          </div>
+
+          @if (mailForm.get('correo')?.invalid && mailForm.get('correo')?.touched) {
+            <p class="error">Debe ingresar al menos un correo destino.</p>
+          }
+
+          @if (mailErrorMessage) {
+            <p class="error">{{ mailErrorMessage }}</p>
+          }
+
+          @if (mailSuccessMessage) {
+            <p class="success">{{ mailSuccessMessage }}</p>
+          }
+
+          <div class="modal-actions">
+            <button type="submit" class="primary" [disabled]="sendingMail">
+              {{ sendingMail ? 'Enviando...' : 'Enviar reporte' }}
+            </button>
+
+            <button type="button" class="secondary" (click)="closeMailModal()">
+              Cerrar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

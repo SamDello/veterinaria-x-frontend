@@ -1,0 +1,127 @@
+<div class="movimientos-caja-page">
+  <div class="page-header">
+    <h2>Movimientos de caja</h2>
+  </div>
+
+  @if (errorMessage) {
+    <p class="error">{{ errorMessage }}</p>
+  }
+
+  <div class="filter-card">
+    <h3>Filtros</h3>
+
+    <form [formGroup]="filtroForm" class="filter-grid">
+      <div>
+        <label>Buscar</label>
+        <input
+          type="text"
+          formControlName="texto"
+          placeholder="Caja, empleado, cliente, método, observación..."
+        />
+      </div>
+
+      <div>
+        <label>Tipo de movimiento</label>
+        <select formControlName="tipo_movimiento">
+          <option value="">Todos</option>
+          <option value="INGRESO">INGRESO</option>
+          <option value="EGRESO">EGRESO</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Referencia</label>
+        <select formControlName="referencia_tipo">
+          <option value="">Todos</option>
+          <option value="PAGO">PAGO</option>
+          <option value="COMPRA">COMPRA</option>
+          <option value="OTRO">OTRO</option>
+        </select>
+      </div>
+
+      <div class="filter-actions">
+        <button type="button" class="secondary" (click)="limpiarFiltros()">
+          Limpiar filtros
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="table-card">
+    <h3>Listado de movimientos</h3>
+
+    @if (loading) {
+      <p>Cargando movimientos...</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Caja</th>
+            <th>Empleado</th>
+            <th>Método de pago</th>
+            <th>Tipo movimiento</th>
+            <th>Monto</th>
+            <th>Referencia</th>
+            <th>Cliente</th>
+            <th>Fecha</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (mov of movimientosFiltrados; track mov.id_movimiento_caja) {
+            <tr>
+              <td>{{ mov.id_movimiento_caja }}</td>
+              <td>{{ getCajaText(mov) }}</td>
+              <td>{{ getEmpleadoText(mov) }}</td>
+              <td>{{ getMetodoPagoText(mov) }}</td>
+              <td>{{ mov.tipo_movimiento }}</td>
+              <td>{{ mov.monto }}</td>
+              <td>{{ mov.referencia_tipo || '-' }}</td>
+              <td>{{ getClienteText(mov) }}</td>
+              <td>{{ mov.created_at | date:'short' }}</td>
+              <td class="actions-cell">
+                <button type="button" class="info-btn" (click)="openDetailModal(mov)">
+                  Ver detalle
+                </button>
+              </td>
+            </tr>
+          }
+
+          @if (movimientosFiltrados.length === 0) {
+            <tr>
+              <td colspan="10" class="empty-cell">No hay movimientos de caja registrados.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  @if (showDetailModal) {
+    <div class="modal-backdrop">
+      <div class="modal modal-lg">
+        <div class="modal-header">
+          <h3>Detalle del movimiento #{{ selectedMovimiento?.id_movimiento_caja }}</h3>
+          <button class="close-btn" (click)="closeDetailModal()">X</button>
+        </div>
+
+        <div class="detail-grid">
+          <div><strong>ID:</strong> {{ selectedMovimiento?.id_movimiento_caja }}</div>
+          <div><strong>Caja:</strong> {{ getCajaText(selectedMovimiento) }}</div>
+          <div><strong>Empleado:</strong> {{ getEmpleadoText(selectedMovimiento) }}</div>
+          <div><strong>Método de pago:</strong> {{ getMetodoPagoText(selectedMovimiento) }}</div>
+          <div><strong>Tipo movimiento:</strong> {{ selectedMovimiento?.tipo_movimiento }}</div>
+          <div><strong>Monto:</strong> {{ selectedMovimiento?.monto }}</div>
+          <div><strong>Referencia tipo:</strong> {{ selectedMovimiento?.referencia_tipo || '-' }}</div>
+          <div><strong>Referencia ID:</strong> {{ selectedMovimiento?.referencia_id || '-' }}</div>
+          <div><strong>ID Pago:</strong> {{ selectedMovimiento?.id_pago || '-' }}</div>
+          <div><strong>ID Apertura:</strong> {{ selectedMovimiento?.id_apertura_caja || '-' }}</div>
+          <div><strong>Cliente:</strong> {{ getClienteText(selectedMovimiento) }}</div>
+          <div><strong>Fecha:</strong> {{ selectedMovimiento?.created_at | date:'short' }}</div>
+          <div class="full-width"><strong>Observación:</strong> {{ selectedMovimiento?.observacion || '-' }}</div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

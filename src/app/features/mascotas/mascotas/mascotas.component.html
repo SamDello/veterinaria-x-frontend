@@ -1,0 +1,185 @@
+<div class="mascotas-page">
+  <div class="page-header">
+    <h2>Gestión de mascotas</h2>
+
+    <button class="primary" type="button" (click)="openCreateModal()">
+      Nueva mascota
+    </button>
+  </div>
+
+  @if (errorMessage) {
+    <p class="error">{{ errorMessage }}</p>
+  }
+
+  @if (successMessage) {
+    <p class="success">{{ successMessage }}</p>
+  }
+
+  <div class="filter-card">
+    <h3>Filtros de mascotas</h3>
+
+    <form [formGroup]="filtrosMascotasForm" class="filter-grid simple-filter-grid">
+      <div>
+        <label>Buscar por nombre del cliente</label>
+        <input
+          type="text"
+          formControlName="texto"
+          placeholder="Ejemplo: David, Juan Pérez..."
+        />
+      </div>
+
+      <div class="filter-actions">
+        <button type="button" class="secondary" (click)="limpiarFiltrosMascotas()">
+          Limpiar filtros
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="table-card">
+    <h3>Listado de mascotas</h3>
+
+    @if (loading) {
+      <p>Cargando mascotas...</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Mascota</th>
+            <th>Cliente</th>
+            <th>Especie</th>
+            <th>Raza</th>
+            <th>Sexo</th>
+            <th>Fecha nacimiento</th>
+            <th>Color</th>
+            <th>Peso</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (mascota of mascotasFiltradas; track mascota.id_mascota) {
+            <tr>
+              <td>{{ mascota.id_mascota }}</td>
+              <td>{{ mascota.nombre }}</td>
+              <td>{{ getClienteText(mascota) }}</td>
+              <td>{{ getEspecieText(mascota) || '-' }}</td>
+              <td>{{ getRazaText(mascota) || '-' }}</td>
+              <td>{{ mascota.sexo || '-' }}</td>
+              <td>{{ mascota.fecha_nacimiento ? (mascota.fecha_nacimiento | date:'shortDate') : '-' }}</td>
+              <td>{{ mascota.color || '-' }}</td>
+              <td>{{ mascota.peso || '-' }}</td>
+              <td>
+                <span [class.active]="mascota.estado" [class.inactive]="!mascota.estado">
+                  {{ mascota.estado ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td class="actions-cell">
+                <button type="button" class="secondary" (click)="openEditModal(mascota)">
+                  Editar
+                </button>
+
+                @if (mascota.estado) {
+                  <button type="button" class="danger" (click)="changeStatus(mascota, false)">
+                    Desactivar
+                  </button>
+                } @else {
+                  <button type="button" class="success-btn" (click)="changeStatus(mascota, true)">
+                    Activar
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+
+          @if (mascotasFiltradas.length === 0) {
+            <tr>
+              <td colspan="11" class="empty-cell">
+                No hay mascotas que coincidan con el cliente buscado.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  @if (showModal) {
+    <div class="modal-backdrop">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>{{ editingId ? 'Editar mascota' : 'Registrar mascota' }}</h3>
+          <button class="close-btn" type="button" (click)="closeModal()">X</button>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="grid">
+            <div>
+              <label>Cliente</label>
+              <select formControlName="id_cliente">
+                <option value="">Seleccione</option>
+
+                @for (cliente of clientes; track cliente.id_cliente) {
+                  <option [value]="cliente.id_cliente">
+                    {{ cliente.nombre }} {{ cliente.apellidos || '' }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div>
+              <label>Nombre de la mascota</label>
+              <input type="text" formControlName="nombre" />
+            </div>
+
+            <div>
+              <label>Especie</label>
+              <input type="text" formControlName="especie" placeholder="Perro, gato, conejo..." />
+            </div>
+
+            <div>
+              <label>Raza</label>
+              <input type="text" formControlName="raza" placeholder="Ejemplo: Criollo, Pastor alemán..." />
+            </div>
+
+            <div>
+              <label>Sexo</label>
+              <select formControlName="sexo">
+                <option value="">Seleccione</option>
+                <option value="MACHO">MACHO</option>
+                <option value="HEMBRA">HEMBRA</option>
+              </select>
+            </div>
+
+            <div>
+              <label>Fecha de nacimiento</label>
+              <input type="date" formControlName="fecha_nacimiento" />
+            </div>
+
+            <div>
+              <label>Color</label>
+              <input type="text" formControlName="color" />
+            </div>
+
+            <div>
+              <label>Peso</label>
+              <input type="number" formControlName="peso" step="0.01" min="0" />
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button type="submit" class="primary" [disabled]="saving">
+              {{ saving ? 'Guardando...' : (editingId ? 'Actualizar' : 'Registrar') }}
+            </button>
+
+            <button type="button" class="secondary" (click)="closeModal()">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

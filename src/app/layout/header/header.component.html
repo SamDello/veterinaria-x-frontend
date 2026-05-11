@@ -1,0 +1,65 @@
+<header class="header">
+  <div class="header-left">
+    <h2>Veterinaria X</h2>
+  </div>
+
+  <div class="header-search">
+    <input
+      type="text"
+      class="search-input"
+      placeholder="Buscar según tu rol: clientes, mascotas, productos, ventas, pagos, caja..."
+      [formControl]="searchControl"
+    />
+
+    @if (searchControl.value) {
+      <button type="button" class="clear-search" (click)="clearSearch()">×</button>
+    }
+
+    @if (searchControl.value.trim().length >= 2) {
+      <div class="search-panel">
+
+        @if (isSearching) {
+          <div class="search-message">
+            Buscando información permitida para tu usuario...
+          </div>
+        }
+
+        @if (!isSearching && searchError) {
+          <div class="search-message error">
+            {{ searchError }}
+          </div>
+        }
+
+        @if (!isSearching && !searchError && searchResults.length === 0) {
+          <div class="search-message">
+            No se encontraron resultados permitidos para "{{ searchedTerm }}".
+          </div>
+        }
+
+        @if (!isSearching && !searchError && searchResults.length > 0) {
+          <div class="search-title">
+            Resultados permitidos para "{{ searchedTerm }}"
+          </div>
+
+          @for (item of searchResults; track item.module + item.type + item.label + item.route) {
+            <button
+              type="button"
+              class="search-item"
+              (click)="goToResult(item)"
+            >
+              <span class="search-type">{{ item.type }}</span>
+              <span class="search-label">{{ item.label }}</span>
+              <small>{{ item.description }}</small>
+            </button>
+          }
+        }
+
+      </div>
+    }
+  </div>
+
+  <div class="header-right">
+    <span>{{ user?.username }}</span>
+    <button type="button" class="logout-button" (click)="logout()">Salir</button>
+  </div>
+</header>

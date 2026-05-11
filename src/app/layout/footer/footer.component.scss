@@ -1,0 +1,35 @@
+.footer {
+  min-height: 64px;
+  background: #eeeeee;
+  border-top: 1px solid #d8d8d8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 10px 16px;
+  color: #333333;
+  font-size: 14px;
+}
+
+.footer-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  text-align: center;
+}
+
+.brand {
+  font-weight: 600;
+}
+
+.separator {
+  color: #8a8a8a;
+}
+
+.visit-error {
+  color: #b00020;
+  font-size: 12px;
+}

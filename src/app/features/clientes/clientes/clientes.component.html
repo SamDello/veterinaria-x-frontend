@@ -1,0 +1,122 @@
+<div class="clientes-page">
+  <div class="page-header">
+    <h2>Gestión de clientes</h2>
+    <button class="primary" (click)="openCreateModal()">Nuevo cliente</button>
+  </div>
+
+  @if (errorMessage) {
+    <p class="error">{{ errorMessage }}</p>
+  }
+
+  @if (successMessage) {
+    <p class="success">{{ successMessage }}</p>
+  }
+
+  <div class="table-card">
+    <h3>Listado de clientes</h3>
+
+    @if (loading) {
+      <p>Cargando clientes...</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre completo</th>
+            <th>CI/NIT</th>
+            <th>Teléfono</th>
+            <th>Correo</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (cliente of clientes; track cliente.id_cliente) {
+            <tr>
+              <td>{{ cliente.id_cliente }}</td>
+              <td>{{ cliente.nombre }} {{ cliente.apellidos || '' }}</td>
+              <td>{{ cliente.ci_nit || '-' }}</td>
+              <td>{{ cliente.telefono || '-' }}</td>
+              <td>{{ cliente.correo || '-' }}</td>
+              <td>
+                <span [class.active]="cliente.estado" [class.inactive]="!cliente.estado">
+                  {{ cliente.estado ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td class="actions-cell">
+                <button type="button" class="secondary" (click)="openEditModal(cliente)">
+                  Editar
+                </button>
+
+                @if (cliente.estado) {
+                  <button type="button" class="danger" (click)="changeStatus(cliente, false)">
+                    Desactivar
+                  </button>
+                } @else {
+                  <button type="button" class="success-btn" (click)="changeStatus(cliente, true)">
+                    Activar
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  @if (showModal) {
+    <div class="modal-backdrop">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>{{ editingId ? 'Editar cliente' : 'Registrar cliente' }}</h3>
+          <button class="close-btn" (click)="closeModal()">X</button>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="grid">
+            <div>
+              <label>Nombre</label>
+              <input type="text" formControlName="nombre" />
+            </div>
+
+            <div>
+              <label>Apellidos</label>
+              <input type="text" formControlName="apellidos" />
+            </div>
+
+            <div>
+              <label>CI / NIT</label>
+              <input type="text" formControlName="ci_nit" />
+            </div>
+
+            <div>
+              <label>Teléfono</label>
+              <input type="text" formControlName="telefono" />
+            </div>
+
+            <div>
+              <label>Correo</label>
+              <input type="email" formControlName="correo" />
+            </div>
+
+            <div>
+              <label>Dirección</label>
+              <input type="text" formControlName="direccion" />
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button type="submit" class="primary" [disabled]="saving">
+              {{ saving ? 'Guardando...' : (editingId ? 'Actualizar' : 'Registrar') }}
+            </button>
+
+            <button type="button" class="secondary" (click)="closeModal()">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

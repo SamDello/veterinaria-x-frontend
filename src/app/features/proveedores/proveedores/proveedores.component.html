@@ -1,0 +1,152 @@
+<div class="proveedores-page">
+  <div class="page-header">
+    <h2>Gestión de proveedores</h2>
+
+    <button class="primary" type="button" (click)="openCreateModal()">
+      Nuevo proveedor
+    </button>
+  </div>
+
+  @if (errorMessage) {
+    <p class="error">{{ errorMessage }}</p>
+  }
+
+  @if (successMessage) {
+    <p class="success">{{ successMessage }}</p>
+  }
+
+  <div class="filter-card">
+    <h3>Filtros de proveedores</h3>
+
+    <form [formGroup]="filtrosProveedoresForm" class="filter-grid simple-filter-grid">
+      <div>
+        <label>Buscar proveedor</label>
+        <input
+          type="text"
+          formControlName="texto"
+          placeholder="Ejemplo: proveedor ABC, distribuidora..."
+        />
+      </div>
+
+      <div class="filter-actions">
+        <button type="button" class="secondary" (click)="limpiarFiltrosProveedores()">
+          Limpiar filtros
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="table-card">
+    <h3>Listado de proveedores</h3>
+
+    @if (loading) {
+      <p>Cargando proveedores...</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>NIT</th>
+            <th>Teléfono</th>
+            <th>Correo</th>
+            <th>Dirección</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (proveedor of proveedoresFiltrados; track proveedor.id_proveedor) {
+            <tr>
+              <td>{{ proveedor.id_proveedor }}</td>
+              <td>{{ proveedor.nombre }}</td>
+              <td>{{ proveedor.nit || '-' }}</td>
+              <td>{{ proveedor.telefono || '-' }}</td>
+              <td>{{ proveedor.correo || '-' }}</td>
+              <td>{{ proveedor.direccion || '-' }}</td>
+              <td>
+                <span [class.active]="proveedor.estado" [class.inactive]="!proveedor.estado">
+                  {{ proveedor.estado ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td class="actions-cell">
+                <button type="button" class="secondary" (click)="openEditModal(proveedor)">
+                  Editar
+                </button>
+
+                @if (proveedor.estado) {
+                  <button type="button" class="danger" (click)="changeStatus(proveedor, false)">
+                    Desactivar
+                  </button>
+                } @else {
+                  <button type="button" class="success-btn" (click)="changeStatus(proveedor, true)">
+                    Activar
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+
+          @if (proveedoresFiltrados.length === 0) {
+            <tr>
+              <td colspan="8" class="empty-cell">
+                No hay proveedores que coincidan con los filtros.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  @if (showModal) {
+    <div class="modal-backdrop">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>{{ editingId ? 'Editar proveedor' : 'Registrar proveedor' }}</h3>
+          <button class="close-btn" type="button" (click)="closeModal()">X</button>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="grid">
+            <div>
+              <label>Nombre</label>
+              <input type="text" formControlName="nombre" />
+            </div>
+
+            <div>
+              <label>NIT</label>
+              <input type="text" formControlName="nit" />
+            </div>
+
+            <div>
+              <label>Teléfono</label>
+              <input type="text" formControlName="telefono" />
+            </div>
+
+            <div>
+              <label>Correo</label>
+              <input type="email" formControlName="correo" />
+            </div>
+
+            <div class="full-width">
+              <label>Dirección</label>
+              <input type="text" formControlName="direccion" />
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button type="submit" class="primary" [disabled]="saving">
+              {{ saving ? 'Guardando...' : (editingId ? 'Actualizar' : 'Registrar') }}
+            </button>
+
+            <button type="button" class="secondary" (click)="closeModal()">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

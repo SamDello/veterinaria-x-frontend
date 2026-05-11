@@ -1,0 +1,220 @@
+<div class="pagos-page">
+  <div class="page-header">
+    <h2>Gestión de pagos</h2>
+  </div>
+
+  @if (errorMessage) {
+    <p class="error">{{ errorMessage }}</p>
+  }
+
+  @if (successMessage) {
+    <p class="success">{{ successMessage }}</p>
+  }
+
+  <div class="filter-card">
+    <h3>Filtros de pagos</h3>
+
+    <form [formGroup]="filtroForm" class="filter-grid simple-filter-grid">
+      <div>
+        <label>Buscar por cliente o empleado</label>
+        <input
+          type="text"
+          formControlName="texto"
+          placeholder="Ejemplo: David, Samuel, Juan Pérez..."
+        />
+      </div>
+
+      <div class="filter-actions">
+        <button type="button" class="secondary" (click)="limpiarFiltros()">
+          Limpiar filtros
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="table-card">
+    <h3>Listado de pagos</h3>
+
+    @if (loading) {
+      <p>Cargando pagos...</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>ID Pago</th>
+            <th>ID Venta</th>
+            <th>Cliente</th>
+            <th>Empleado</th>
+            <th>Método</th>
+            <th>Monto</th>
+            <th>Estado</th>
+            <!-- <th>Estado QR</th> -->
+            <th>Fecha</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (pago of pagosFiltrados; track pago.id_pago) {
+            <tr>
+              <td>{{ pago.id_pago }}</td>
+              <td>{{ pago.venta?.id_venta || pago.id_venta }}</td>
+              <td>{{ getClienteText(pago) }}</td>
+              <td>{{ getEmpleadoText(pago) }}</td>
+              <td>{{ getMetodoText(pago) }}</td>
+              <td>{{ pago.monto }}</td>
+              <td>
+                <span [class.active]="pago.estado === 'PAGADO'" [class.inactive]="pago.estado !== 'PAGADO'">
+                  {{ pago.estado }}
+                </span>
+              </td>
+              <!-- <td>{{ getEstadoQrText(pago) }}</td> -->
+              <td>{{ pago.fecha | date:'short' }}</td>
+              <td class="actions-cell">
+                <button type="button" class="info-btn" (click)="openDetailModal(pago)">
+                  Ver detalle
+                </button>
+
+                <!-- @if (esPagoQr(pago) && pago.estado === 'PENDIENTE') {
+                  <button
+                    type="button"
+                    class="primary"
+                    [disabled]="qrLoading"
+                    (click)="consultarEstadoQrDesdeTabla(pago)"
+                  >
+                    Actualizar QR
+                  </button>
+                } -->
+              </td>
+            </tr>
+          }
+
+          @if (pagosFiltrados.length === 0) {
+            <tr>
+              <td colspan="10" class="empty-cell">
+                No hay pagos que coincidan con los filtros.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  @if (showDetailModal) {
+    <div class="modal-backdrop">
+      <div class="modal modal-lg">
+        <div class="modal-header">
+          <h3>Detalle del pago #{{ selectedPago?.id_pago }}</h3>
+          <button class="close-btn" type="button" (click)="closeDetailModal()">X</button>
+        </div>
+
+        <div class="detail-grid">
+          <div>
+            <strong>ID Pago:</strong> {{ selectedPago?.id_pago }}
+          </div>
+
+          <div>
+            <strong>ID Venta:</strong> {{ selectedPago?.venta?.id_venta || selectedPago?.id_venta }}
+          </div>
+
+          <div>
+            <strong>Cliente:</strong> {{ getClienteText(selectedPago) }}
+          </div>
+
+          <div>
+            <strong>Empleado:</strong> {{ getEmpleadoText(selectedPago) }}
+          </div>
+
+          <div>
+            <strong>Método de pago:</strong> {{ getMetodoText(selectedPago) }}
+          </div>
+
+          <div>
+            <strong>Monto:</strong> {{ selectedPago?.monto }}
+          </div>
+
+          <div>
+            <strong>Estado pago:</strong> {{ selectedPago?.estado }}
+          </div>
+
+          <div>
+            <strong>Fecha:</strong> {{ selectedPago?.fecha | date:'short' }}
+          </div>
+
+          <div>
+            <strong>Referencia externa:</strong> {{ selectedPago?.referencia_externa || '-' }}
+          </div>
+
+          <div>
+            <strong>Fecha confirmación:</strong>
+            {{ selectedPago?.fecha_confirmacion ? (selectedPago?.fecha_confirmacion | date:'short') : '-' }}
+          </div>
+
+          <div class="full-width">
+            <strong>Observación:</strong> {{ selectedPago?.observacion || '-' }}
+          </div>
+        </div>
+
+        @if (esPagoQr(selectedPago)) {
+          <div class="qr-section">
+            <h4>Datos QR Libélula</h4>
+
+            <div class="detail-grid">
+              <div>
+                <strong>Estado Libélula:</strong> {{ getEstadoQrText(selectedPago) }}
+              </div>
+
+              <div>
+                <strong>Identificador deuda:</strong>
+                {{ selectedPago?.pagoQrLibelula?.identificador_deuda || '-' }}
+              </div>
+
+              <div>
+                <strong>Transacción Libélula:</strong>
+                {{ selectedPago?.pagoQrLibelula?.codigo_transaccion_libelula || '-' }}
+              </div>
+
+              <div>
+                <strong>Moneda:</strong>
+                {{ selectedPago?.pagoQrLibelula?.moneda || '-' }}
+              </div>
+            </div>
+
+            @if (getQrPaymentUrl(selectedPago)) {
+              <p class="qr-link">
+                <strong>Link de pago:</strong>
+                <a [href]="getQrPaymentUrl(selectedPago)" target="_blank">Abrir pago</a>
+              </p>
+            }
+
+            @if (getQrImageUrl(selectedPago)) {
+              <div class="qr-image">
+                <img [src]="getQrImageUrl(selectedPago)" alt="QR Libélula" />
+              </div>
+            }
+
+            <div class="modal-actions">
+              <button
+                type="button"
+                class="primary"
+                [disabled]="qrLoading"
+                (click)="consultarEstadoQr()"
+              >
+                {{ qrLoading ? 'Consultando...' : 'Imprimir' }}
+              </button>
+            </div>
+          </div>
+        }
+
+        @if (modalErrorMessage) {
+          <p class="error">{{ modalErrorMessage }}</p>
+        }
+
+        @if (modalSuccessMessage) {
+          <p class="success">{{ modalSuccessMessage }}</p>
+        }
+      </div>
+    </div>
+  }
+</div>

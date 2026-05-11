@@ -1,0 +1,148 @@
+<div class="movimientos-inventario-page">
+  <div class="page-header">
+    <h2>Movimientos de inventario</h2>
+    <button class="primary" (click)="openCreateModal()">Nuevo movimiento</button>
+  </div>
+
+  @if (errorMessage) {
+    <p class="error">{{ errorMessage }}</p>
+  }
+
+  @if (successMessage) {
+    <p class="success">{{ successMessage }}</p>
+  }
+
+  <div class="table-card">
+    <h3>Listado de movimientos</h3>
+
+    @if (loading) {
+      <p>Cargando movimientos...</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Producto</th>
+            <th>Almacén</th>
+            <th>Empleado</th>
+            <th>Tipo</th>
+            <th>Cantidad</th>
+            <th>Stock anterior</th>
+            <th>Stock nuevo</th>
+            <th>Motivo</th>
+            <th>Referencia</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of movimientos; track item.id_movimiento_inventario) {
+            <tr>
+              <td>{{ item.id_movimiento_inventario }}</td>
+              <td>{{ getProductoText(item) }}</td>
+              <td>{{ getAlmacenText(item) }}</td>
+              <td>{{ getEmpleadoText(item) }}</td>
+              <td>{{ item.tipo_movimiento }}</td>
+              <td>{{ item.cantidad }}</td>
+              <td>{{ item.stock_anterior }}</td>
+              <td>{{ item.stock_nuevo }}</td>
+              <td>{{ item.motivo || '-' }}</td>
+              <td>
+                {{ item.referencia_tipo || '-' }}
+                @if (item.referencia_id) {
+                  - {{ item.referencia_id }}
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  @if (showModal) {
+    <div class="modal-backdrop">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>Registrar movimiento de inventario</h3>
+          <button class="close-btn" (click)="closeModal()">X</button>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="grid">
+            <div>
+              <label>Producto</label>
+              <select formControlName="id_producto">
+                <option value="">Seleccione</option>
+                @for (producto of productos; track producto.id_producto) {
+                  <option [value]="producto.id_producto">
+                    {{ producto.nombre }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div>
+              <label>Almacén</label>
+              <select formControlName="id_almacen">
+                <option value="">Seleccione</option>
+                @for (almacen of almacenes; track almacen.id_almacen) {
+                  <option [value]="almacen.id_almacen">
+                    {{ almacen.nombre }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div>
+              <label>Tipo de movimiento</label>
+              <select formControlName="tipo_movimiento">
+                <option value="">Seleccione</option>
+                <option value="INGRESO">INGRESO</option>
+                <option value="SALIDA">SALIDA</option>
+                <option value="AJUSTE">AJUSTE</option>
+              </select>
+            </div>
+
+            <div>
+              <label>Cantidad</label>
+              <input type="number" formControlName="cantidad" min="0" step="1" />
+            </div>
+
+            <div class="full-width">
+              <label>Empleado</label>
+              <input type="text" [value]="getEmpleadoSesionText()" readonly />
+            </div>
+
+            <div class="full-width">
+              <label>Motivo</label>
+              <input type="text" formControlName="motivo" />
+            </div>
+
+            <div>
+              <label>Referencia tipo</label>
+              <input type="text" formControlName="referencia_tipo" placeholder="COMPRA, VENTA, AJUSTE..." />
+            </div>
+
+            <div>
+              <label>Referencia ID</label>
+              <input type="number" formControlName="referencia_id" min="1" />
+            </div>
+          </div>
+
+          @if (modalErrorMessage) {
+            <p class="error">{{ modalErrorMessage }}</p>
+          }
+
+          <div class="modal-actions">
+            <button type="submit" class="primary" [disabled]="saving">
+              {{ saving ? 'Guardando...' : 'Registrar movimiento' }}
+            </button>
+
+            <button type="button" class="secondary" (click)="closeModal()">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

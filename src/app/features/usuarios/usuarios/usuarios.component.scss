@@ -1,0 +1,208 @@
+.usuarios-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.table-card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+button {
+  border: none;
+  padding: 10px 14px;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.primary {
+  background: #1976d2;
+  color: white;
+}
+
+.secondary {
+  background: #ddd;
+}
+
+.danger {
+  background: #d9534f;
+  color: white;
+}
+
+.success-btn {
+  background: #198754;
+  color: white;
+}
+
+.info-btn {
+  background: #0dcaf0;
+  color: white;
+}
+
+.error {
+  color: red;
+}
+
+.success {
+  color: green;
+}
+
+.active {
+  color: #198754;
+  font-weight: 600;
+}
+
+.inactive {
+  color: #d9534f;
+  font-weight: 600;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  width: 850px;
+  max-width: 95%;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.modal-lg {
+  width: 1000px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.close-btn {
+  background: #eee;
+  color: #333;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.grid div {
+  display: flex;
+  flex-direction: column;
+}
+
+input {
+  padding: 10px;
+}
+
+.roles-select-box {
+  margin-top: 20px;
+}
+
+.roles-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 10px;
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+.rol-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f8f9fa;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.password-help {
+  margin-top: 10px;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.password-help p {
+  margin: 0 0 8px 0;
+  font-weight: 600;
+}
+
+.password-help ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.password-help li {
+  margin-bottom: 4px;
+  color: #d9534f;
+}
+
+.password-help li.valid {
+  color: #198754;
+  font-weight: 600;
+}
+
+.password-note {
+  display: block;
+  margin-top: 8px;
+  color: #666;
+}
+
+.password-warning {
+  display: block;
+  margin-top: 8px;
+  color: #d9534f;
+  font-size: 13px;
+  line-height: 1.4;
+}

@@ -1,0 +1,109 @@
+<div class="almacenes-page">
+  <div class="page-header">
+    <h2>Gestión de almacenes</h2>
+    <button class="primary" (click)="openCreateModal()">Nuevo almacén</button>
+  </div>
+
+  @if (errorMessage) {
+    <p class="error">{{ errorMessage }}</p>
+  }
+
+  @if (successMessage) {
+    <p class="success">{{ successMessage }}</p>
+  }
+
+  <div class="table-card">
+    <h3>Listado de almacenes</h3>
+
+    @if (loading) {
+      <p>Cargando almacenes...</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Ubicación</th>
+            <th>Descripción</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of almacenes; track item.id_almacen) {
+            <tr>
+              <td>{{ item.id_almacen }}</td>
+              <td>{{ item.nombre }}</td>
+              <td>{{ item.ubicacion || '-' }}</td>
+              <td>{{ item.descripcion || '-' }}</td>
+              <td>
+                <span [class.active]="item.estado" [class.inactive]="!item.estado">
+                  {{ item.estado ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td class="actions-cell">
+                <button type="button" class="secondary" (click)="openEditModal(item)">
+                  Editar
+                </button>
+
+                @if (item.estado) {
+                  <button type="button" class="danger" (click)="changeStatus(item, false)">
+                    Desactivar
+                  </button>
+                } @else {
+                  <button type="button" class="success-btn" (click)="changeStatus(item, true)">
+                    Activar
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  @if (showModal) {
+    <div class="modal-backdrop">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>{{ editingId ? 'Editar almacén' : 'Registrar almacén' }}</h3>
+          <button class="close-btn" (click)="closeModal()">X</button>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="grid">
+            <div>
+              <label>Nombre</label>
+              <input type="text" formControlName="nombre" />
+            </div>
+
+            <div>
+              <label>Ubicación</label>
+              <input type="text" formControlName="ubicacion" />
+            </div>
+
+            <div class="full-width">
+              <label>Descripción</label>
+              <input type="text" formControlName="descripcion" />
+            </div>
+          </div>
+
+          @if (modalErrorMessage) {
+            <p class="error">{{ modalErrorMessage }}</p>
+          }
+
+          <div class="modal-actions">
+            <button type="submit" class="primary" [disabled]="saving">
+              {{ saving ? 'Guardando...' : (editingId ? 'Actualizar' : 'Registrar') }}
+            </button>
+
+            <button type="button" class="secondary" (click)="closeModal()">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

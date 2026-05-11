@@ -1,0 +1,13 @@
+<footer class="footer">
+  <div class="footer-info">
+    <span class="brand">Veterinaria X - Sistema de Gestión</span>
+    <span class="separator">|</span>
+    <span>Página: {{ currentPageLabel }}</span>
+    <span class="separator">|</span>
+    <span>Visitas: {{ totalVisits }}</span>
+  </div>
+
+  @if (visitError) {
+    <small class="visit-error">{{ visitError }}</small>
+  }
+</footer>

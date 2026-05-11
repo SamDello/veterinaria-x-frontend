@@ -1,0 +1,206 @@
+<div class="atenciones-page">
+  <div class="page-header">
+    <h2>Atenciones veterinarias</h2>
+    <button class="primary" (click)="openCreateModal()">Nueva atención</button>
+  </div>
+
+  @if (errorMessage) {
+    <p class="error">{{ errorMessage }}</p>
+  }
+
+  @if (successMessage) {
+    <p class="success">{{ successMessage }}</p>
+  }
+
+  <div class="table-card">
+    <h3>Listado de atenciones</h3>
+
+    @if (loading) {
+      <p>Cargando atenciones...</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Mascota</th>
+            <th>Empleado</th>
+            <th>Fecha</th>
+            <th>Motivo</th>
+            <th>Servicios</th>
+            <th>Peso</th>
+            <th>Temperatura</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of atenciones; track item.id_atencion) {
+            <tr>
+              <td>{{ item.id_atencion }}</td>
+              <td>{{ getMascotaText(item) }}</td>
+              <td>{{ getEmpleadoText(item) }}</td>
+              <td>{{ item.fecha | date:'short' }}</td>
+              <td>{{ item.motivo_consulta || '-' }}</td>
+              <td>{{ getServiciosText(item) }}</td>
+              <td>{{ item.peso || '-' }}</td>
+              <td>{{ item.temperatura || '-' }}</td>
+              <td>
+                <span [class.active]="item.estado" [class.inactive]="!item.estado">
+                  {{ item.estado ? 'Activa' : 'Inactiva' }}
+                </span>
+              </td>
+              <td class="actions-cell">
+                <button type="button" class="secondary" (click)="openEditModal(item)">
+                  Editar
+                </button>
+
+                @if (item.estado) {
+                  <button type="button" class="danger" (click)="changeStatus(item, false)">
+                    Desactivar
+                  </button>
+                } @else {
+                  <button type="button" class="success-btn" (click)="changeStatus(item, true)">
+                    Activar
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  @if (showModal) {
+    <div class="modal-backdrop">
+      <div class="modal modal-lg">
+        <div class="modal-header">
+          <h3>{{ editingId ? 'Editar atención' : 'Registrar atención' }}</h3>
+          <button class="close-btn" (click)="closeModal()">X</button>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="grid">
+            <div>
+              <label>Mascota</label>
+              <select formControlName="id_mascota">
+                <option value="">Seleccione</option>
+                @for (mascota of mascotas; track mascota.id_mascota) {
+                  <option [value]="mascota.id_mascota">
+                    {{ mascota.nombre }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div>
+              <label>Fecha</label>
+              <input type="datetime-local" formControlName="fecha" />
+            </div>
+
+            <div class="full-width">
+              <label>Empleado</label>
+              <input type="text" [value]="getEmpleadoSesionText()" readonly />
+            </div>
+
+            <div class="full-width">
+              <label>Motivo de consulta</label>
+              <input type="text" formControlName="motivo_consulta" />
+            </div>
+
+            <div class="full-width">
+              <label>Diagnóstico</label>
+              <textarea formControlName="diagnostico" rows="3"></textarea>
+            </div>
+
+            <div class="full-width">
+              <label>Tratamiento</label>
+              <textarea formControlName="tratamiento" rows="3"></textarea>
+            </div>
+
+            <div class="full-width">
+              <label>Observaciones</label>
+              <textarea formControlName="observaciones" rows="3"></textarea>
+            </div>
+
+            <div>
+              <label>Peso</label>
+              <input type="number" formControlName="peso" step="0.01" />
+            </div>
+
+            <div>
+              <label>Temperatura</label>
+              <input type="number" formControlName="temperatura" step="0.1" />
+            </div>
+          </div>
+
+          <div class="services-section">
+            <div class="services-header">
+              <h4>Servicios aplicados</h4>
+              <button type="button" class="info-btn" (click)="addServicio()">
+                Agregar servicio
+              </button>
+            </div>
+
+            @if (serviciosFormArray.length === 0) {
+              <p>No hay servicios agregados.</p>
+            }
+
+            <div formArrayName="servicios" class="services-list">
+              @for (servicioGroup of serviciosFormArray.controls; track $index) {
+                <div [formGroupName]="$index" class="service-item">
+                  <div>
+                    <label>Servicio</label>
+                    <select formControlName="id_servicio" (change)="onServicioChange($index)">
+                      <option value="">Seleccione</option>
+                      @for (servicio of serviciosCatalogo; track servicio.id_servicio) {
+                        <option [value]="servicio.id_servicio">
+                          {{ servicio.nombre }}
+                        </option>
+                      }
+                    </select>
+                  </div>
+
+                  <div>
+                    <label>Cantidad</label>
+                    <input type="number" formControlName="cantidad" min="1" step="1" />
+                  </div>
+
+                  <div>
+                    <label>Precio unitario</label>
+                    <input type="number" formControlName="precio_unitario" min="0" step="0.01" />
+                  </div>
+
+                  <div>
+                    <label>Observación</label>
+                    <input type="text" formControlName="observacion" />
+                  </div>
+
+                  <div class="service-actions">
+                    <button type="button" class="danger" (click)="removeServicio($index)">
+                      Quitar
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          @if (modalErrorMessage) {
+            <p class="error">{{ modalErrorMessage }}</p>
+          }
+
+          <div class="modal-actions">
+            <button type="submit" class="primary" [disabled]="saving">
+              {{ saving ? 'Guardando...' : (editingId ? 'Actualizar' : 'Registrar') }}
+            </button>
+
+            <button type="button" class="secondary" (click)="closeModal()">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

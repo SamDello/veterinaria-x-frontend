@@ -1,0 +1,184 @@
+<div class="usuarios-page">
+  <div class="page-header">
+    <h2>Gestión de usuarios</h2>
+    <button class="primary" (click)="openCreateModal()">Nuevo usuario</button>
+  </div>
+
+  @if (errorMessage) {
+    <p class="error">{{ errorMessage }}</p>
+  }
+
+  @if (successMessage) {
+    <p class="success">{{ successMessage }}</p>
+  }
+
+  <div class="table-card">
+    <h3>Listado de usuarios</h3>
+
+    @if (loading) {
+      <p>Cargando usuarios...</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Correo</th>
+            <th>Roles</th>
+            <th>Empleado</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (usuario of usuarios; track usuario.id_usuario) {
+            <tr>
+              <td>{{ usuario.id_usuario }}</td>
+              <td>{{ usuario.username }}</td>
+              <td>{{ usuario.correo }}</td>
+              <td>{{ getRolesText(usuario) }}</td>
+              <td>{{ getEmpleadoText(usuario) }}</td>
+              <td>
+                <span [class.active]="usuario.estado" [class.inactive]="!usuario.estado">
+                  {{ usuario.estado ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td class="actions-cell">
+                <button type="button" class="secondary" (click)="openEditModal(usuario)">
+                  Editar
+                </button>
+
+                <button type="button" class="info-btn" (click)="openRolesModal(usuario)">
+                  Roles
+                </button>
+
+                @if (usuario.estado) {
+                  <button type="button" class="danger" (click)="changeStatus(usuario, false)">
+                    Desactivar
+                  </button>
+                } @else {
+                  <button type="button" class="success-btn" (click)="changeStatus(usuario, true)">
+                    Activar
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  @if (showModal) {
+    <div class="modal-backdrop">
+      <div class="modal modal-lg">
+        <div class="modal-header">
+          <h3>{{ editingId ? 'Editar usuario' : 'Registrar usuario' }}</h3>
+          <button class="close-btn" (click)="closeModal()">X</button>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="grid">
+            <div>
+              <label>Username</label>
+              <input type="text" formControlName="username" />
+            </div>
+
+            <div>
+              <label>Correo</label>
+              <input type="email" formControlName="correo" />
+            </div>
+
+            <div>
+              <label>Contraseña</label>
+              <input type="text" formControlName="password" />
+
+              @if (passwordWarningMessage && !editingId) {
+                <small class="password-warning">
+                  {{ passwordWarningMessage }}
+                </small>
+              }
+
+              @if (editingId) {
+                <small class="password-note">
+                  Déjala vacía si no deseas cambiar la contraseña.
+                </small>
+              }
+            </div>
+          </div>
+
+          @if (!editingId) {
+            <div class="roles-select-box">
+              <h4>Roles del usuario</h4>
+
+              <div class="roles-grid">
+                @for (rol of roles; track rol.id_rol) {
+                  <label class="rol-item">
+                    <input
+                      type="checkbox"
+                      [checked]="isRolSelected(rol.id_rol)"
+                      (change)="onCreateRoleChange(rol.id_rol, $event)"
+                    />
+                    <span>{{ rol.nombre }}</span>
+                  </label>
+                }
+              </div>
+            </div>
+          }
+
+          @if (modalErrorMessage) {
+            <p class="error">{{ modalErrorMessage }}</p>
+          }
+
+          @if (modalSuccessMessage) {
+            <p class="success">{{ modalSuccessMessage }}</p>
+          }
+
+          <div class="modal-actions">
+            <button type="submit" class="primary" [disabled]="saving">
+              {{ saving ? 'Guardando...' : (editingId ? 'Actualizar' : 'Registrar') }}
+            </button>
+
+            <button type="button" class="secondary" (click)="closeModal()">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  @if (showRolesModal) {
+    <div class="modal-backdrop">
+      <div class="modal modal-lg">
+        <div class="modal-header">
+          <h3>Asignar roles a {{ selectedUsuario?.username }}</h3>
+          <button class="close-btn" (click)="closeRolesModal()">X</button>
+        </div>
+
+        <div class="roles-grid">
+          @for (rol of roles; track rol.id_rol) {
+            <label class="rol-item">
+              <input
+                type="checkbox"
+                [checked]="isRolSelected(rol.id_rol)"
+                (change)="toggleRol(rol.id_rol, $event)"
+              />
+              <span>{{ rol.nombre }}</span>
+            </label>
+          }
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="primary" [disabled]="saving" (click)="saveRoles()">
+            {{ saving ? 'Guardando...' : 'Guardar roles' }}
+          </button>
+
+          <button type="button" class="secondary" (click)="closeRolesModal()">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

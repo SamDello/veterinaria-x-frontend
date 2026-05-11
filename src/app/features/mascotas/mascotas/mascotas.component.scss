@@ -1,0 +1,188 @@
+.mascotas-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.page-header,
+.table-card,
+.filter-card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: 2fr auto;
+  gap: 16px;
+  margin-top: 16px;
+  align-items: end;
+}
+
+.simple-filter-grid {
+  grid-template-columns: 2fr auto;
+}
+
+.filter-grid div {
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-actions {
+  justify-content: end;
+}
+
+.table-card {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.empty-cell {
+  text-align: center;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+button {
+  border: none;
+  padding: 10px 14px;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.primary {
+  background: #1976d2;
+  color: white;
+}
+
+.secondary {
+  background: #ddd;
+  color: #333;
+}
+
+.danger {
+  background: #d9534f;
+  color: white;
+}
+
+.success-btn {
+  background: #198754;
+  color: white;
+}
+
+.error {
+  color: #d9534f;
+}
+
+.success {
+  color: #198754;
+}
+
+.active {
+  color: #198754;
+  font-weight: 600;
+}
+
+.inactive {
+  color: #d9534f;
+  font-weight: 600;
+}
+
+input,
+select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  width: 850px;
+  max-width: 95%;
+  border-radius: 12px;
+  padding: 20px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.close-btn {
+  background: #eee;
+  color: #333;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.grid div {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+@media (max-width: 900px) {
+  .filter-grid,
+  .simple-filter-grid,
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .actions-cell,
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}

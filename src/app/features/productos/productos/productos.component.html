@@ -1,0 +1,138 @@
+<div class="productos-page">
+  <div class="page-header">
+    <h2>Gestión de productos</h2>
+    <button class="primary" (click)="openCreateModal()">Nuevo producto</button>
+  </div>
+
+  @if (errorMessage) {
+    <p class="error">{{ errorMessage }}</p>
+  }
+
+  @if (successMessage) {
+    <p class="success">{{ successMessage }}</p>
+  }
+
+  <div class="table-card">
+    <h3>Listado de productos</h3>
+
+    @if (loading) {
+      <p>Cargando productos...</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Categoría</th>
+            <th>Marca</th>
+            <th>Precio compra</th>
+            <th>Precio venta</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (producto of productos; track producto.id_producto) {
+            <tr>
+              <td>{{ producto.id_producto }}</td>
+              <td>{{ producto.nombre }}</td>
+              <td>{{ producto.categoria?.nombre || '-' }}</td>
+              <td>{{ producto.marca?.nombre || '-' }}</td>
+              <td>{{ producto.precio_compra }}</td>
+              <td>{{ producto.precio_venta }}</td>
+              <td>
+                <span [class.active]="producto.estado" [class.inactive]="!producto.estado">
+                  {{ producto.estado ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td class="actions-cell">
+                <button type="button" class="secondary" (click)="openEditModal(producto)">
+                  Editar
+                </button>
+
+                @if (producto.estado) {
+                  <button type="button" class="danger" (click)="changeStatus(producto, false)">
+                    Desactivar
+                  </button>
+                } @else {
+                  <button type="button" class="success-btn" (click)="changeStatus(producto, true)">
+                    Activar
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  @if (showModal) {
+    <div class="modal-backdrop">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>{{ editingId ? 'Editar producto' : 'Registrar producto' }}</h3>
+          <button class="close-btn" (click)="closeModal()">X</button>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="grid">
+            <div>
+              <label>Categoría</label>
+              <select formControlName="id_categoria">
+                <option value="">Seleccione</option>
+                @for (categoria of categorias; track categoria.id_categoria) {
+                  <option [value]="categoria.id_categoria">
+                    {{ categoria.nombre }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div>
+              <label>Marca</label>
+              <select formControlName="id_marca">
+                <option value="">Seleccione</option>
+                @for (marca of marcas; track marca.id_marca) {
+                  <option [value]="marca.id_marca">
+                    {{ marca.nombre }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div>
+              <label>Nombre</label>
+              <input type="text" formControlName="nombre" />
+            </div>
+
+            <div>
+              <label>Descripción</label>
+              <input type="text" formControlName="descripcion" />
+            </div>
+
+            <div>
+              <label>Precio compra</label>
+              <input type="number" formControlName="precio_compra" step="0.01" />
+            </div>
+
+            <div>
+              <label>Precio venta</label>
+              <input type="number" formControlName="precio_venta" step="0.01" />
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button type="submit" class="primary" [disabled]="saving">
+              {{ saving ? 'Guardando...' : (editingId ? 'Actualizar' : 'Registrar') }}
+            </button>
+
+            <button type="button" class="secondary" (click)="closeModal()">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

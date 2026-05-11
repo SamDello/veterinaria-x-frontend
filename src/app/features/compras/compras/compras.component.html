@@ -1,0 +1,199 @@
+<div class="compras-page">
+  <div class="page-header">
+    <h2>Gestión de compras</h2>
+
+    <button class="primary" type="button" (click)="openCreateModal()">
+      Nueva compra
+    </button>
+  </div>
+
+  @if (errorMessage) {
+    <p class="error">{{ errorMessage }}</p>
+  }
+
+  @if (successMessage) {
+    <p class="success">{{ successMessage }}</p>
+  }
+
+  <div class="filter-card">
+    <h3>Filtros de compras</h3>
+
+    <form [formGroup]="filtrosComprasForm" class="filter-grid simple-filter-grid">
+      <div>
+        <label>Buscar por empleado o proveedor</label>
+        <input
+          type="text"
+          formControlName="texto"
+          placeholder="Ejemplo: Samuel, proveedor ABC..."
+        />
+      </div>
+
+      <div class="filter-actions">
+        <button type="button" class="secondary" (click)="limpiarFiltrosCompras()">
+          Limpiar filtros
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="table-card">
+    <h3>Listado de compras</h3>
+
+    @if (loading) {
+      <p>Cargando compras...</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Proveedor</th>
+            <th>Empleado</th>
+            <th>Almacén</th>
+            <th>Fecha</th>
+            <th>Total</th>
+            <th>Observación</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (compra of comprasFiltradas; track compra.id_compra) {
+            <tr>
+              <td>{{ compra.id_compra }}</td>
+              <td>{{ compra.proveedor?.nombre || '-' }}</td>
+              <td>{{ compra.empleado?.nombre }} {{ compra.empleado?.apellidos || '' }}</td>
+              <td>{{ compra.almacen?.nombre || '-' }}</td>
+              <td>{{ compra.fecha | date:'short' }}</td>
+              <td>{{ compra.total }}</td>
+              <td>{{ compra.observacion || '-' }}</td>
+            </tr>
+          }
+
+          @if (comprasFiltradas.length === 0) {
+            <tr>
+              <td colspan="7" class="empty-cell">
+                No hay compras que coincidan con los filtros.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  @if (showModal) {
+    <div class="modal-backdrop">
+      <div class="modal modal-lg">
+        <div class="modal-header">
+          <h3>Registrar compra</h3>
+          <button class="close-btn" type="button" (click)="closeModal()">X</button>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="grid">
+            <div>
+              <label>Proveedor</label>
+              <select formControlName="id_proveedor">
+                <option value="">Seleccione</option>
+
+                @for (proveedor of proveedores; track proveedor.id_proveedor) {
+                  <option [value]="proveedor.id_proveedor">
+                    {{ proveedor.nombre }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div>
+              <label>Almacén</label>
+              <select formControlName="id_almacen">
+                <option value="">Seleccione</option>
+
+                @for (almacen of almacenes; track almacen.id_almacen) {
+                  <option [value]="almacen.id_almacen">
+                    {{ almacen.nombre }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div class="full-width">
+              <label>Observación</label>
+              <input type="text" formControlName="observacion" />
+            </div>
+          </div>
+
+          <div class="detalle-header">
+            <h4>Detalle de compra</h4>
+
+            <button type="button" class="secondary" (click)="addDetalle()">
+              Agregar producto
+            </button>
+          </div>
+
+          <div formArrayName="detalles" class="detalle-list">
+            @for (detalle of detalles.controls; track $index) {
+
+              <div class="detalle-item" [formGroupName]="$index">
+                <select formControlName="id_producto">
+                  <option value="">Producto</option>
+
+                  @for (producto of productos; track producto.id_producto) {
+                    <option [value]="producto.id_producto">
+                      {{ producto.nombre }}
+                    </option>
+                  }
+                </select>
+                <div class="inputs">
+                  <label for="input_cant">Cantidad</label>
+                  <input
+                    type="number"
+                    formControlName="cantidad"
+                    placeholder="Cantidad"
+                    min="1"
+                  />
+                </div>
+
+                <div class="inputs">
+                  <label for="input_cant">Costo Unitario</label>
+                  <input
+                  type="number"
+                  formControlName="costo_unitario"
+                  placeholder="Costo unitario"
+                  step="0.01"
+                  min="0"
+                />
+                </div>
+
+                <div class="inputs">
+                  <label for="input_cant">Costo Total</label>
+
+                  <input type="text" [value]="calcularSubtotal(detalle.value)" readonly />
+                </div>
+
+
+
+                <button type="button" class="danger" (click)="removeDetalle($index)">
+                  Quitar
+                </button>
+              </div>
+            }
+          </div>
+
+          <div class="total-box">
+            <strong>Total general: {{ getTotalGeneral() }}</strong>
+          </div>
+
+          <div class="modal-actions">
+            <button type="submit" class="primary" [disabled]="saving">
+              {{ saving ? 'Guardando...' : 'Registrar compra' }}
+            </button>
+
+            <button type="button" class="secondary" (click)="closeModal()">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

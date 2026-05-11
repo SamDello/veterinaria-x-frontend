@@ -1,0 +1,149 @@
+<div class="empleados-page">
+  <div class="page-header">
+    <h2>Gestión de empleados</h2>
+    <button class="primary" (click)="openCreateModal()">Nuevo empleado</button>
+  </div>
+
+  @if (errorMessage) {
+    <p class="error">{{ errorMessage }}</p>
+  }
+
+  @if (successMessage) {
+    <p class="success">{{ successMessage }}</p>
+  }
+
+  <div class="table-card">
+    <h3>Listado de empleados</h3>
+
+    @if (loading) {
+      <p>Cargando empleados...</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Usuario</th>
+            <th>Nombre completo</th>
+            <th>CI</th>
+            <th>Teléfono</th>
+            <th>Cargo</th>
+            <th>Especialidad</th>
+            <th>Roles</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (empleado of empleados; track empleado.id_empleado) {
+            <tr>
+              <td>{{ empleado.id_empleado }}</td>
+              <td>{{ getUsuarioText(empleado) }}</td>
+              <td>{{ empleado.nombre }} {{ empleado.apellidos }}</td>
+              <td>{{ empleado.ci || '-' }}</td>
+              <td>{{ empleado.telefono || '-' }}</td>
+              <td>{{ empleado.cargo || '-' }}</td>
+              <td>{{ empleado.especialidad || '-' }}</td>
+              <td>{{ getRolesText(empleado) }}</td>
+              <td>
+                <span [class.active]="empleado.estado" [class.inactive]="!empleado.estado">
+                  {{ empleado.estado ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td class="actions-cell">
+                <button type="button" class="secondary" (click)="openEditModal(empleado)">
+                  Editar
+                </button>
+
+                @if (empleado.estado) {
+                  <button type="button" class="danger" (click)="changeStatus(empleado, false)">
+                    Desactivar
+                  </button>
+                } @else {
+                  <button type="button" class="success-btn" (click)="changeStatus(empleado, true)">
+                    Activar
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  @if (showModal) {
+    <div class="modal-backdrop">
+      <div class="modal modal-lg">
+        <div class="modal-header">
+          <h3>{{ editingId ? 'Editar empleado' : 'Registrar empleado' }}</h3>
+          <button class="close-btn" (click)="closeModal()">X</button>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="grid">
+            <div>
+              <label>Usuario</label>
+              <select formControlName="id_usuario">
+                <option value="">Seleccione</option>
+                @for (usuario of getUsuariosDisponibles(); track usuario.id_usuario) {
+                  <option [value]="usuario.id_usuario">
+                    {{ usuario.username }} - {{ usuario.correo }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <div>
+              <label>Nombre</label>
+              <input type="text" formControlName="nombre" />
+            </div>
+
+            <div>
+              <label>Apellidos</label>
+              <input type="text" formControlName="apellidos" />
+            </div>
+
+            <div>
+              <label>CI</label>
+              <input type="text" formControlName="ci" />
+            </div>
+
+            <div>
+              <label>Teléfono</label>
+              <input type="text" formControlName="telefono" />
+            </div>
+
+            <div>
+              <label>Dirección</label>
+              <input type="text" formControlName="direccion" />
+            </div>
+
+            <div>
+              <label>Cargo</label>
+              <input type="text" formControlName="cargo" />
+            </div>
+
+            <div>
+              <label>Especialidad</label>
+              <input type="text" formControlName="especialidad" />
+            </div>
+          </div>
+
+          @if (modalErrorMessage) {
+            <p class="error">{{ modalErrorMessage }}</p>
+          }
+
+          <div class="modal-actions">
+            <button type="submit" class="primary" [disabled]="saving">
+              {{ saving ? 'Guardando...' : (editingId ? 'Actualizar' : 'Registrar') }}
+            </button>
+
+            <button type="button" class="secondary" (click)="closeModal()">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>
