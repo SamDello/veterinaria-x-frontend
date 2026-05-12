@@ -1,5 +1,12 @@
+declare global {
+  interface Window {
+    __env?: {
+      apiUrl?: string;
+    };
+  }
+}
+
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:3000/api',
-  
+  apiUrl: window.__env?.apiUrl || 'http://localhost:3000/api',
 };
