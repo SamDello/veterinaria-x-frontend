@@ -31,6 +31,9 @@ import { AtencionesVeterinariasComponent } from './features/atenciones-veterinar
 import { ServiciosVeterinariosComponent } from './features/servicios-veterinarios/servicios-veterinarios/servicios-veterinarios.component';
 import { HistorialAtencionesComponent } from './features/historial-atenciones/historial-atenciones/historial-atenciones.component';
 import { TraspasosComponent } from './features/traspasos/traspasos/traspasos.component';
+import { permissionGuard } from './core/guards/permission.guard';
+import { InicioComponent } from './features/inicio/inicio/inicio.component';
+import { nonAdminGuard } from './core/guards/non-admin.guard';
 
 export const routes: Routes = [
   {
@@ -42,9 +45,19 @@ export const routes: Routes = [
     component: MainLayoutComponent,
     canActivate: [authGuard],
     children: [
+
+      {
+        path: 'inicio',
+        component: InicioComponent,
+        canActivate: [nonAdminGuard]
+      },
       {
         path: 'dashboard',
-        component: DashboardComponent
+        component: DashboardComponent,
+        canActivate: [permissionGuard],
+        data: {
+          permissions: ['VER_DASHBOARD_ADMIN']
+        }
       },
       {
         path: 'clientes',
@@ -154,10 +167,10 @@ export const routes: Routes = [
         path: 'traspasos',
         component: TraspasosComponent
       },
-      
+
       {
         path: '',
-        redirectTo: 'dashboard',
+        redirectTo: 'inicio',
         pathMatch: 'full'
       }
     ]

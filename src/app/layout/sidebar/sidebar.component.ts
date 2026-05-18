@@ -40,6 +40,14 @@ export class SidebarComponent {
 
     return isAdmin || hasDirectPermission;
   }
+  isAdmin(): boolean {
+  const roles = this.user?.roles || [];
+
+  return (
+    roles.includes('ADMINISTRADOR') ||
+    roles.some((rol: any) => rol?.nombre === 'ADMINISTRADOR')
+  );
+}
 
   canShowAdministracion(): boolean {
     return (

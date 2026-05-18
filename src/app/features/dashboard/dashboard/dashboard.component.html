@@ -1,4 +1,182 @@
-<div class="dashboard">
-  <h1>Bienvenido, {{ user?.username }}</h1>
-  <p>Sistema de Gestión Veterinaria X</p>
+<div class="dashboard-page">
+  <div class="dashboard-header">
+    <div>
+      <h1>Dashboard administrativo</h1>
+      <p>Bienvenido, {{ user?.username || user?.nombre || 'Administrador' }}</p>
+    </div>
+
+    <button class="secondary" type="button" (click)="loadDashboard()" [disabled]="loading">
+      {{ loading ? 'Actualizando...' : 'Actualizar' }}
+    </button>
+  </div>
+
+  @if (errorMessage) {
+    <p class="error">{{ errorMessage }}</p>
+  }
+
+  @if (loading) {
+    <div class="card">
+      <p>Cargando dashboard...</p>
+    </div>
+  }
+
+  @if (!loading && data) {
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span>Ventas de hoy</span>
+        <strong>{{ data.ventas_hoy }}</strong>
+        <small>Bs</small>
+      </div>
+
+      <div class="stat-card">
+        <span>Ventas del mes</span>
+        <strong>{{ data.ventas_mes }}</strong>
+        <small>Bs</small>
+      </div>
+
+      <div class="stat-card warning">
+        <span>Pagos pendientes</span>
+        <strong>{{ data.pagos_pendientes }}</strong>
+        <small>por cobrar</small>
+      </div>
+
+      <div class="stat-card danger">
+        <span>Stock bajo</span>
+        <strong>{{ data.productos_stock_bajo }}</strong>
+        <small>productos</small>
+      </div>
+
+      <div class="stat-card info">
+        <span>Atenciones pendientes</span>
+        <strong>{{ data.atenciones_pendientes }}</strong>
+        <small>por cobrar</small>
+      </div>
+
+      <div class="stat-card success">
+        <span>Traspasos del mes</span>
+        <strong>{{ data.traspasos_mes }}</strong>
+        <small>registrados</small>
+      </div>
+    </div>
+
+    <div class="dashboard-grid">
+      <div class="card chart-card">
+        <h3>Ventas últimos 7 días</h3>
+
+        @for (item of data.ventas_ultimos_7_dias || []; track item.fecha) {
+          <div class="bar-row">
+            <span>{{ item.fecha }}</span>
+
+            <div class="bar-wrapper">
+              <div class="bar" [style.width.%]="getVentaBarWidth(item.total)">
+                {{ item.total }}
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="card">
+        <h3>Últimas ventas</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Cliente</th>
+              <th>Empleado</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (venta of data.ultimas_ventas || []; track venta.id_venta) {
+              <tr>
+                <td>{{ venta.id_venta }}</td>
+                <td>{{ getClienteText(venta) }}</td>
+                <td>{{ getEmpleadoText(venta) }}</td>
+                <td>{{ venta.total }}</td>
+              </tr>
+            }
+
+            @if (!data.ultimas_ventas || data.ultimas_ventas.length === 0) {
+              <tr>
+                <td colspan="4" class="empty-cell">No hay ventas recientes.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="dashboard-grid">
+      <div class="card">
+        <h3>Productos con stock bajo</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Almacén</th>
+              <th>Actual</th>
+              <th>Mínimo</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (stock of data.detalle_stock_bajo || []; track stock.id_stock) {
+              <tr>
+                <td>{{ stock.producto?.nombre || '-' }}</td>
+                <td>{{ stock.almacen?.nombre || '-' }}</td>
+                <td>{{ stock.stock_actual }}</td>
+                <td>{{ stock.stock_minimo }}</td>
+              </tr>
+            }
+
+            @if (!data.detalle_stock_bajo || data.detalle_stock_bajo.length === 0) {
+              <tr>
+                <td colspan="4" class="empty-cell">No hay productos con stock bajo.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3>Últimos movimientos FIFO</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Tipo</th>
+              <th>Producto</th>
+              <th>Almacén</th>
+              <th>Cantidad</th>
+              <th>Costo</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (mov of data.ultimos_movimientos_fifo || []; track mov.id_lote_movimiento) {
+              <tr>
+                <td>
+                  <span class="badge">{{ mov.tipo }}</span>
+                </td>
+                <td>{{ mov.producto?.nombre || '-' }}</td>
+                <td>{{ getMovimientoAlmacenText(mov) }}</td>
+                <td>{{ mov.cantidad }}</td>
+                <td>{{ mov.costo_total }}</td>
+              </tr>
+            }
+
+            @if (!data.ultimos_movimientos_fifo || data.ultimos_movimientos_fifo.length === 0) {
+              <tr>
+                <td colspan="5" class="empty-cell">No hay movimientos FIFO recientes.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
 </div>

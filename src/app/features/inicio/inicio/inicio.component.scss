@@ -1,0 +1,65 @@
+.inicio-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.welcome-card,
+.info-card {
+  background: white;
+  padding: 28px;
+  border-radius: 16px;
+}
+
+.welcome-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.welcome-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #e3f2fd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+}
+
+.welcome-card h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.welcome-card p {
+  margin: 8px 0;
+  color: #607d8b;
+}
+
+.welcome-card span {
+  display: inline-block;
+  margin-top: 4px;
+  background: #f1f3f5;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  color: #333;
+}
+
+.info-card h2 {
+  margin-top: 0;
+}
+
+.info-card p {
+  color: #555;
+  line-height: 1.6;
+}
+
+@media (max-width: 700px) {
+  .welcome-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

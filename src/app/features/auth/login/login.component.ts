@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -35,12 +36,28 @@ export class LoginComponent {
     this.authService.login(this.form.getRawValue() as { correo: string; password: string }).subscribe({
       next: () => {
         this.loading = false;
-        this.router.navigate(['/dashboard']);
+
+        const user = this.authService.getUser();
+
+        if (this.esAdministrador(user)) {
+          this.router.navigate(['/dashboard']);
+        } else {
+          this.router.navigate(['/inicio']);
+        }
       },
       error: (error) => {
         this.loading = false;
         this.errorMessage = error?.error?.message || 'Error al iniciar sesión';
       }
     });
+  }
+
+  private esAdministrador(user: any): boolean {
+    const roles = user?.roles || [];
+
+    return (
+      roles.includes('ADMINISTRADOR') ||
+      roles.some((rol: any) => rol?.nombre === 'ADMINISTRADOR')
+    );
   }
 }

@@ -11,35 +11,45 @@
         <label>Tipo de reporte</label>
         <select formControlName="tipo">
           <option value="ventas">Reporte de ventas</option>
-          <option value="compras">Reporte de compras</option>
+          <!-- <option value="compras">Reporte de compras</option> -->
           <option value="stock">Reporte de stock</option>
-          <option value="atenciones">Reporte de atenciones</option>
+          <!-- <option value="atenciones">Reporte de atenciones</option> -->
           <option value="pagos">Reporte de pagos</option>
         </select>
       </div>
 
-      <div>
-        <label>Fecha inicio</label>
-        <input type="date" formControlName="fecha_inicio" />
-      </div>
+      @if (!isStock()) {
+        <div>
+          <label>Fecha inicio</label>
+          <input type="date" formControlName="fecha_inicio" />
+        </div>
 
-      <div>
-        <label>Fecha fin</label>
-        <input type="date" formControlName="fecha_fin" />
-      </div>
+        <div>
+          <label>Fecha fin</label>
+          <input type="date" formControlName="fecha_fin" />
+        </div>
+      }
 
       @if (isStock()) {
         <div>
-          <label>ID almacén</label>
-          <input type="number" formControlName="id_almacen" min="1" />
+          <label>Almacén</label>
+          <select formControlName="id_almacen">
+            <option value="">Todos los almacenes</option>
+
+            @for (almacen of almacenes; track almacen.id_almacen) {
+              <option [value]="almacen.id_almacen">
+                {{ almacen.nombre }}
+              </option>
+            }
+          </select>
         </div>
 
-        <div class="checkbox-field">
+        <!-- <div class="checkbox-field">
           <label>
             <input type="checkbox" formControlName="stock_bajo" />
             Solo stock bajo
           </label>
-        </div>
+        </div> -->
       }
 
       @if (isAtenciones()) {
@@ -217,50 +227,50 @@
     }
 
     @if (isPagos()) {
-  <div>
-    <label>Estado de pago</label>
-    <select formControlName="estado_pago">
-      <option value="">Todos</option>
-      <option value="PAGADO">PAGADO</option>
-      <option value="PENDIENTE">PENDIENTE</option>
-      <option value="ANULADO">ANULADO</option>
-      <option value="EXPIRADO">EXPIRADO</option>
-    </select>
-  </div>
-}
+      <div>
+        <label>Estado de pago</label>
+        <select formControlName="estado_pago">
+          <option value="">Todos</option>
+          <option value="PAGADO">PAGADO</option>
+          <option value="PENDIENTE">PENDIENTE</option>
+          <option value="ANULADO">ANULADO</option>
+          <option value="EXPIRADO">EXPIRADO</option>
+        </select>
+      </div>
+    }
 
-@if (isPagos()) {
-  <table>
-    <thead>
-      <tr>
-        <th>ID Pago</th>
-        <th>Fecha</th>
-        <th>ID Venta</th>
-        <th>Cliente</th>
-        <th>Empleado</th>
-        <th>Método</th>
-        <th>Monto</th>
-        <th>Estado</th>
-        <th>Referencia</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (item of resultados; track item.id_pago) {
-        <tr>
-          <td>{{ item.id_pago }}</td>
-          <td>{{ item.fecha | date:'short' }}</td>
-          <td>{{ item.venta?.id_venta || item.id_venta }}</td>
-          <td>{{ item.venta?.cliente?.nombre }} {{ item.venta?.cliente?.apellidos || '' }}</td>
-          <td>{{ item.venta?.empleado?.nombre }} {{ item.venta?.empleado?.apellidos || '' }}</td>
-          <td>{{ item.metodoPago?.nombre || '-' }}</td>
-          <td>{{ item.monto }}</td>
-          <td>{{ item.estado }}</td>
-          <td>{{ item.referencia_externa || '-' }}</td>
-        </tr>
-      }
-    </tbody>
-  </table>
-}
+    @if (isPagos()) {
+      <table>
+        <thead>
+          <tr>
+            <th>ID Pago</th>
+            <th>Fecha</th>
+            <th>ID Venta</th>
+            <th>Cliente</th>
+            <th>Empleado</th>
+            <th>Método</th>
+            <th>Monto</th>
+            <th>Estado</th>
+            <th>Referencia</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of resultados; track item.id_pago) {
+            <tr>
+              <td>{{ item.id_pago }}</td>
+              <td>{{ item.fecha | date:'short' }}</td>
+              <td>{{ item.venta?.id_venta || item.id_venta }}</td>
+              <td>{{ item.venta?.cliente?.nombre }} {{ item.venta?.cliente?.apellidos || '' }}</td>
+              <td>{{ item.venta?.empleado?.nombre }} {{ item.venta?.empleado?.apellidos || '' }}</td>
+              <td>{{ item.metodoPago?.nombre || '-' }}</td>
+              <td>{{ item.monto }}</td>
+              <td>{{ item.estado }}</td>
+              <td>{{ item.referencia_externa || '-' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
 
     @if (!loading && resultados.length === 0) {
       <p>No hay resultados para mostrar.</p>

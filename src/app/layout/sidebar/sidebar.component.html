@@ -1,8 +1,16 @@
 <aside class="sidebar">
   <nav class="menu">
-    <a routerLink="/dashboard" routerLinkActive="active" class="single-link">
-      Dashboard
-    </a>
+    @if (!isAdmin()) {
+        <a routerLink="/inicio" routerLinkActive="active" class="single-link">
+          Inicio
+        </a>
+      }
+
+      @if (isAdmin()) {
+        <a routerLink="/dashboard" routerLinkActive="active" class="single-link">
+          Dashboard
+        </a>
+      }
 
     @if (canShowAdministracion()) {
       <div class="menu-group">

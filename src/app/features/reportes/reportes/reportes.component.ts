@@ -1,7 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+
 import { ReporteService } from '../../../core/services/reporte.service';
+import { AlmacenService } from '../../../core/services/almacen.service';
 
 @Component({
   selector: 'app-reportes',
@@ -10,9 +12,10 @@ import { ReporteService } from '../../../core/services/reporte.service';
   templateUrl: './reportes.component.html',
   styleUrl: './reportes.component.scss'
 })
-export class ReportesComponent {
+export class ReportesComponent implements OnInit {
   private fb = inject(FormBuilder);
   private reporteService = inject(ReporteService);
+  private almacenService = inject(AlmacenService);
 
   loading = false;
   sendingMail = false;
@@ -26,21 +29,69 @@ export class ReportesComponent {
   resultados: any[] = [];
   resumen: any = null;
 
+  almacenes: any[] = [];
+
   showMailModal = false;
 
   form = this.fb.group({
-  tipo: ['ventas', Validators.required],
-  fecha_inicio: [''],
-  fecha_fin: [''],
-  id_almacen: [''],
-  stock_bajo: [false],
-  id_mascota: [''],
-  estado_pago: ['']
-});
+    tipo: ['ventas', Validators.required],
+    fecha_inicio: [''],
+    fecha_fin: [''],
+    id_almacen: [''],
+    stock_bajo: [false],
+    id_mascota: [''],
+    estado_pago: ['']
+  });
 
   mailForm = this.fb.group({
     correo: ['', [Validators.required]]
   });
+
+  ngOnInit(): void {
+    this.loadAlmacenes();
+
+    this.form.get('tipo')?.valueChanges.subscribe((tipo) => {
+      this.onTipoReporteChange(tipo || 'ventas');
+    });
+  }
+
+  loadAlmacenes(): void {
+    this.almacenService.getAlmacenes().subscribe({
+      next: (response) => {
+        this.almacenes = response?.data || [];
+      },
+      error: () => {
+        this.almacenes = [];
+      }
+    });
+  }
+
+  onTipoReporteChange(tipo: string): void {
+    if (tipo === 'stock') {
+      this.form.patchValue(
+        {
+          fecha_inicio: '',
+          fecha_fin: '',
+          id_mascota: '',
+          estado_pago: ''
+        },
+        { emitEvent: false }
+      );
+    } else {
+      this.form.patchValue(
+        {
+          id_almacen: '',
+          stock_bajo: false
+        },
+        { emitEvent: false }
+      );
+    }
+
+    this.resultados = [];
+    this.resumen = null;
+    this.errorMessage = '';
+    this.successMessage = '';
+  }
 
   consultar(): void {
     this.loading = true;
@@ -67,7 +118,6 @@ export class ReportesComponent {
       case 'atenciones':
         request$ = this.reporteService.getReporteAtenciones(params);
         break;
-
       case 'pagos':
         request$ = this.reporteService.getReportePagos(params);
         break;
@@ -82,9 +132,9 @@ export class ReportesComponent {
         this.resultados = response?.data || [];
         this.resumen = {
           total_registros: response?.total_registros || 0,
-          total_ventas: response?.total_ventas || null,
-          total_compras: response?.total_compras || null,
-          total_pagos: response?.total_pagos || null,
+          total_ventas: response?.total_ventas ?? null,
+          total_compras: response?.total_compras ?? null,
+          total_pagos: response?.total_pagos ?? null,
           resumen_estados: response?.resumen_estados || null
         };
         this.loading = false;
@@ -267,6 +317,15 @@ export class ReportesComponent {
   }
 
   buildQueryParams(): any {
+    const tipo = this.form.value.tipo;
+
+    if (tipo === 'stock') {
+      return {
+        id_almacen: this.form.value.id_almacen || '',
+        stock_bajo: this.form.value.stock_bajo ? 'true' : ''
+      };
+    }
+
     return {
       fecha_inicio: this.form.value.fecha_inicio || '',
       fecha_fin: this.form.value.fecha_fin || '',
@@ -294,6 +353,6 @@ export class ReportesComponent {
   }
 
   isPagos(): boolean {
-  return this.form.value.tipo === 'pagos';
-}
+    return this.form.value.tipo === 'pagos';
+  }
 }
