@@ -209,6 +209,52 @@ input:focus {
   margin: 4px 0 12px;
 }
 
+/* =========================================================
+   CORRECCIÓN LOGIN EN MODO NOCHE
+   Inputs legibles y focus azul
+========================================================= */
+
+:host-context(.mode-night) input {
+  background: rgba(30, 41, 59, 0.82) !important;
+  color: #f8fafc !important;
+  border-color: rgba(148, 163, 184, 0.45) !important;
+}
+
+:host-context(.mode-night) input::placeholder {
+  color: #cbd5e1 !important;
+}
+
+:host-context(.mode-night) input:focus {
+  background: rgba(30, 64, 175, 0.85) !important;
+  color: #ffffff !important;
+  border-color: #60a5fa !important;
+  box-shadow:
+    0 0 0 3px rgba(96, 165, 250, 0.35),
+    inset 0 1px 2px rgba(15, 23, 42, 0.12) !important;
+}
+
+:host-context(.mode-night) input:focus::placeholder {
+  color: #dbeafe !important;
+}
+
+:host-context(.mode-night) .password-toggle {
+  background: rgba(96, 165, 250, 0.18) !important;
+  color: #ffffff !important;
+}
+
+:host-context(.mode-night) .password-toggle:hover {
+  background: rgba(96, 165, 250, 0.28) !important;
+}
+
+/* Corrige autocompletado de Chrome en modo noche */
+:host-context(.mode-night) input:-webkit-autofill,
+:host-context(.mode-night) input:-webkit-autofill:hover,
+:host-context(.mode-night) input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: 0 0 0 1000px rgba(30, 64, 175, 0.85) inset !important;
+  border-color: #60a5fa !important;
+}
+
 @media (max-width: 1300px) {
   .login-card {
     margin-left: 260px;
