@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnDestroy, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
@@ -11,13 +11,18 @@ import { AuthService } from '../../../core/services/auth.service';
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
-export class LoginComponent {
+export class LoginComponent implements OnDestroy {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
 
   loading = false;
   errorMessage = '';
+
+  // Por defecto la contraseña está oculta
+  passwordVisible = false;
+
+  private errorTimeout: ReturnType<typeof setTimeout> | null = null;
 
   form = this.fb.group({
     correo: ['', [Validators.required, Validators.email]],
@@ -31,11 +36,12 @@ export class LoginComponent {
     }
 
     this.loading = true;
-    this.errorMessage = '';
+    this.clearErrorMessage();
 
     this.authService.login(this.form.getRawValue() as { correo: string; password: string }).subscribe({
       next: () => {
         this.loading = false;
+        this.clearErrorMessage();
 
         const user = this.authService.getUser();
 
@@ -47,9 +53,35 @@ export class LoginComponent {
       },
       error: (error) => {
         this.loading = false;
-        this.errorMessage = error?.error?.message || 'Error al iniciar sesión';
+
+        const message = error?.error?.message || 'Error al iniciar sesión';
+        this.showTemporaryError(message);
       }
     });
+  }
+
+  togglePasswordVisibility(): void {
+    this.passwordVisible = !this.passwordVisible;
+  }
+
+  private showTemporaryError(message: string): void {
+    this.clearErrorMessage();
+
+    this.errorMessage = message;
+
+    this.errorTimeout = setTimeout(() => {
+      this.errorMessage = '';
+      this.errorTimeout = null;
+    }, 2000);
+  }
+
+  private clearErrorMessage(): void {
+    this.errorMessage = '';
+
+    if (this.errorTimeout) {
+      clearTimeout(this.errorTimeout);
+      this.errorTimeout = null;
+    }
   }
 
   private esAdministrador(user: any): boolean {
@@ -59,5 +91,11 @@ export class LoginComponent {
       roles.includes('ADMINISTRADOR') ||
       roles.some((rol: any) => rol?.nombre === 'ADMINISTRADOR')
     );
+  }
+
+  ngOnDestroy(): void {
+    if (this.errorTimeout) {
+      clearTimeout(this.errorTimeout);
+    }
   }
 }

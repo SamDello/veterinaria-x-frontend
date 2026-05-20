@@ -1,12 +1,14 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+
 import { AuthService } from '../../core/services/auth.service';
+import { ThemeSelectorComponent } from '../../shared/components/theme-selector/theme-selector.component';
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterLink, RouterLinkActive, ThemeSelectorComponent],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss'
 })
@@ -40,14 +42,15 @@ export class SidebarComponent {
 
     return isAdmin || hasDirectPermission;
   }
-  isAdmin(): boolean {
-  const roles = this.user?.roles || [];
 
-  return (
-    roles.includes('ADMINISTRADOR') ||
-    roles.some((rol: any) => rol?.nombre === 'ADMINISTRADOR')
-  );
-}
+  isAdmin(): boolean {
+    const roles = this.user?.roles || [];
+
+    return (
+      roles.includes('ADMINISTRADOR') ||
+      roles.some((rol: any) => rol?.nombre === 'ADMINISTRADOR')
+    );
+  }
 
   canShowAdministracion(): boolean {
     return (

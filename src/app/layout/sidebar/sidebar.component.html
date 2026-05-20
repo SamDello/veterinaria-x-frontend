@@ -1,16 +1,16 @@
 <aside class="sidebar">
   <nav class="menu">
     @if (!isAdmin()) {
-        <a routerLink="/inicio" routerLinkActive="active" class="single-link">
-          Inicio
-        </a>
-      }
+      <a routerLink="/inicio" routerLinkActive="active" class="single-link">
+        Inicio
+      </a>
+    }
 
-      @if (isAdmin()) {
-        <a routerLink="/dashboard" routerLinkActive="active" class="single-link">
-          Dashboard
-        </a>
-      }
+    @if (isAdmin()) {
+      <a routerLink="/dashboard" routerLinkActive="active" class="single-link">
+        Dashboard
+      </a>
+    }
 
     @if (canShowAdministracion()) {
       <div class="menu-group">
@@ -28,10 +28,6 @@
             @if (hasPermission('GESTIONAR_ROLES')) {
               <a routerLink="/roles" routerLinkActive="active">Roles</a>
             }
-
-            <!-- @if (hasPermission('GESTIONAR_PERMISOS')) {
-              <a routerLink="/permisos" routerLinkActive="active">Permisos</a>
-            } -->
 
             @if (hasPermission('GESTIONAR_EMPLEADOS')) {
               <a routerLink="/empleados" routerLinkActive="active">Empleados</a>
@@ -188,5 +184,9 @@
         }
       </div>
     }
+
+    <div class="theme-bottom">
+      <app-theme-selector></app-theme-selector>
+    </div>
   </nav>
 </aside>

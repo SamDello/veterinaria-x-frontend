@@ -1,0 +1,55 @@
+<div class="theme-selector">
+  <div class="theme-title">
+    Apariencia
+  </div>
+
+  <div class="theme-field">
+    <label>Tipo de tema</label>
+
+    <select
+      [value]="settings().audience"
+      (change)="setAudience($event)"
+    >
+      @for (option of audienceOptions; track option.value) {
+        <option [value]="option.value">
+          {{ option.icon }} {{ option.label }}
+        </option>
+      }
+    </select>
+  </div>
+
+  <label class="auto-field">
+    <input
+      type="checkbox"
+      [checked]="settings().autoMode"
+      (change)="toggleAutoMode($event)"
+    />
+
+    <span>Automático día/noche</span>
+  </label>
+
+  <button
+    type="button"
+    class="mode-switch"
+    [class.is-night]="settings().mode === 'night'"
+    (click)="toggleMode()"
+  >
+    <span class="switch-thumb">
+      {{ getModeIcon() }}
+    </span>
+
+    <span class="switch-text">
+      {{ getModeText() }}
+    </span>
+  </button>
+
+  @if (settings().autoMode) {
+    <small class="theme-help">
+      Se ajusta según la hora del cliente
+    </small>
+  } @else {
+    <small class="theme-help">
+      Modo manual activado
+    </small>
+  }
+</div>
